@@ -1,0 +1,66 @@
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; scroll-padding-top: calc(var(--header-h) + 12px); -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--ink);
+  color: var(--ink-text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+img, svg, iframe { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+button, input, textarea, select { font: inherit; color: inherit; }
+button { cursor: pointer; background: none; border: 0; padding: 0; }
+h1, h2, h3, h4, p { margin: 0; }
+address { font-style: normal; }
+code { font-family: var(--font-mono); font-size: 0.9em; }
+::selection { background: var(--accent); color: var(--accent-ink); }
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+
+.container { width: 100%; max-width: var(--container); margin-inline: auto; padding-inline: var(--gutter); }
+
+.section { position: relative; padding-block: clamp(80px, 11vw, 150px); }
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.eyebrow .tick { width: 22px; height: 2px; background: currentColor; }
+.eyebrow--light { color: var(--accent-ink); }
+
+.section-title {
+  margin-top: 18px;
+  font-family: var(--font-display);
+  font-stretch: 115%;
+  font-weight: 800;
+  font-size: clamp(36px, 5.6vw, 72px);
+  line-height: 0.98;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+}
+.section-title em { font-style: normal; color: var(--muted); }
+.section-title--light { color: var(--accent-ink); }
+
+.mono { font-family: var(--font-mono); font-size: 13px; }
+.muted { color: var(--muted); }
+
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+
+@media (max-width: 720px) {
+  .hide-sm { display: none !important; }
+}

@@ -1,0 +1,12 @@
+.section-head { display: grid; grid-template-columns: 1.3fr 1fr; gap: 40px; align-items: end; margin-bottom: 48px; }
+.section-head__aside { display: grid; gap: 22px; }
+.section-head__aside p { color: var(--muted); max-width: 420px; }
+@media (max-width: 860px) { .section-head { grid-template-columns: 1fr; gap: 28px; } }
+
+/* Dibujos técnicos */
+.schematic { overflow: visible; }
+.schematic__grid line { stroke: var(--ink-line); stroke-width: 0.5; }
+.schematic__part * { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.schematic__part .thin { stroke-width: 0.9; opacity: 0.6; }
+.schematic__part .accent { stroke: var(--accent); stroke-width: 2; }
+.schematic.is-drawn .schematic__part * { stroke-dasharray: 400; stroke-dashoffset: 400; animation: draw 1.6s var(--ease-in-out) forwards; }

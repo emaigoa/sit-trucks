@@ -1,0 +1,153 @@
+/* =========================================================
+   Slider de destacados (Showcase)
+   ========================================================= */
+.showcase { position: relative; background: var(--ink); }
+.slider { position: relative; overflow: hidden; outline: none; touch-action: pan-y; user-select: none; }
+.slider__track { display: flex; transition: transform 0.9s var(--ease-out); will-change: transform; }
+.slider.is-dragging .slider__track { transition: none; cursor: grabbing; }
+.slider__slide { flex: 0 0 100%; min-width: 0; display: flex; }
+.slider__slide > * { flex: 1; }
+
+.slide { position: relative; min-height: clamp(560px, 78vh, 720px); display: flex; align-items: center; overflow: hidden; }
+.slide--dark { background: radial-gradient(ellipse 70% 80% at 80% 50%, #22272c, var(--ink) 70%); color: var(--ink-text); }
+.slide--steel { background: linear-gradient(120deg, #1b2026 0%, #2a3139 100%); color: var(--ink-text); }
+.slide--accent { background: var(--accent); color: var(--accent-ink); }
+.slide--paper { background: var(--paper); color: var(--text); }
+.slide::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(currentColor 1px, transparent 1px), linear-gradient(90deg, currentColor 1px, transparent 1px); background-size: 56px 56px; opacity: 0.05; pointer-events: none; }
+
+.slide__inner { position: relative; display: grid; grid-template-columns: 1.05fr 1fr; gap: 40px; align-items: center; padding-block: 72px 120px; }
+.slide__kicker { display: flex; align-items: center; gap: 12px; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.8; }
+.slide__kicker span { padding: 4px 8px; border: 1px solid currentColor; border-radius: 2px; }
+.slide__title { margin-top: 18px; font-family: var(--font-display); font-stretch: 125%; font-weight: 900; font-size: clamp(42px, 6.2vw, 92px); line-height: 0.92; letter-spacing: -0.045em; text-transform: uppercase; }
+.slide--dark .slide__title, .slide--steel .slide__title { color: var(--ink-text); }
+.slide__text { max-width: 480px; margin-top: 22px; font-size: 18px; opacity: 0.8; }
+.slide__chips { display: flex; flex-wrap: wrap; gap: 8px; max-width: 520px; margin: 26px 0 0; padding: 0; list-style: none; }
+.slide__chips li { padding: 6px 12px; border: 1px solid currentColor; border-radius: 99px; font-family: var(--font-mono); font-size: 12px; opacity: 0.75; }
+.slide__cta { margin-top: 32px; }
+.slide__dispatch { margin-top: 20px; font-size: 14px; color: var(--accent-ink) !important; }
+
+/* Entrada escalonada del contenido del slide activo */
+.slide__copy > * { opacity: 0; transform: translateY(26px); transition: opacity 0.7s var(--ease-out), transform 0.9s var(--ease-out); }
+.slider__slide.is-active .slide__copy > * { opacity: 1; transform: none; }
+.slider__slide.is-active .slide__copy > *:nth-child(2) { transition-delay: 0.08s; }
+.slider__slide.is-active .slide__copy > *:nth-child(3) { transition-delay: 0.16s; }
+.slider__slide.is-active .slide__copy > *:nth-child(4) { transition-delay: 0.24s; }
+.slider__slide.is-active .slide__copy > *:nth-child(5) { transition-delay: 0.32s; }
+
+.slide__art { position: relative; display: grid; place-items: center; height: 100%; min-height: 360px; }
+.slide__ghost { position: absolute; right: -4%; top: 50%; font-family: var(--font-display); font-stretch: 125%; font-weight: 900; font-size: clamp(90px, 15vw, 220px); line-height: 1; letter-spacing: -0.06em; text-transform: uppercase; white-space: nowrap; color: transparent; -webkit-text-stroke: 1px rgba(255, 255, 255, 0.12); transform: translateY(-50%) translateX(12%); transition: transform 1.6s var(--ease-out); }
+.slider__slide.is-active .slide__ghost { transform: translateY(-50%) translateX(0); }
+.slide__schematic { position: relative; width: min(380px, 80%); color: var(--ink-text); transform: rotate(-20deg) scale(0.9); opacity: 0; transition: transform 1.4s var(--ease-out), opacity 0.8s; }
+.slider__slide.is-active .slide__schematic { transform: none; opacity: 1; }
+.slider__slide.is-active .slide__schematic .schematic__part * { stroke-dasharray: 400; stroke-dashoffset: 400; animation: draw 1.8s var(--ease-in-out) 0.2s forwards; }
+
+/* Camión del slide de despacho */
+.truck-art { width: min(460px, 100%); overflow: visible; }
+.truck-art * { fill: none; stroke: var(--accent-ink); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.truck-art .thin { stroke-width: 1.6; opacity: 0.6; }
+.truck-art__body { animation: truck-bob 0.5s ease-in-out infinite alternate; }
+@keyframes truck-bob { to { transform: translateY(-2px); } }
+.truck-art__speed path { stroke-dasharray: 14 10; animation: speed 0.6s linear infinite; }
+@keyframes speed { to { stroke-dashoffset: -24; } }
+.truck-art__road { stroke-dasharray: 26 16; animation: speed 0.5s linear infinite; }
+.slider__slide:not(.is-active) .truck-art { opacity: 0; }
+
+/* Tarjetas de medios de pago */
+.slide__art--pay { display: flex; flex-wrap: wrap; align-content: center; justify-content: center; gap: 12px; }
+.pay-card { display: grid; place-items: center; min-width: 190px; height: 74px; padding: 0 22px; border-radius: 10px; background: #fff; border: 1px solid var(--paper-line); font-weight: 800; font-stretch: 110%; font-size: 17px; letter-spacing: -0.01em; box-shadow: 0 16px 30px -20px rgba(14, 16, 18, 0.4); opacity: 0; transform: translateY(30px) rotate(-3deg); transition: opacity 0.6s var(--ease-out), transform 0.8s var(--ease-out); transition-delay: calc(0.15s + var(--i) * 0.08s); }
+.pay-card:nth-child(odd) { background: var(--ink); color: var(--ink-text); }
+.slider__slide.is-active .pay-card { opacity: 1; transform: rotate(calc((var(--i) - 2) * 1.5deg)); }
+
+/* Controles */
+.slider__controls { position: absolute; left: 0; right: 0; bottom: 32px; display: flex; align-items: center; gap: 24px; pointer-events: none; }
+.slider__controls > * { pointer-events: auto; }
+.slider__counter { font-family: var(--font-mono); font-size: 13px; color: var(--ink-muted); mix-blend-mode: difference; }
+.slider__counter strong { color: #fff; }
+.slider__dots { display: flex; gap: 8px; flex: 1; max-width: 360px; }
+.slider__dots button { position: relative; flex: 1; height: 18px; }
+.slider__dots button::before, .slider__dots i { content: ''; position: absolute; left: 0; right: 0; top: 8px; height: 2px; border-radius: 2px; }
+.slider__dots button::before { background: rgba(255, 255, 255, 0.25); mix-blend-mode: difference; }
+.slider__dots i { background: #fff; mix-blend-mode: difference; transform-origin: left; transform: scaleX(0); }
+.slider__dots .is-active i { transform: scaleX(1); }
+.slider__dots i.is-running { animation: dot-fill var(--interval) linear forwards; }
+@keyframes dot-fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.slider__arrows { display: flex; gap: 8px; margin-left: auto; }
+.slider__arrows button { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.4); color: #fff; mix-blend-mode: difference; transition: background-color 0.2s, transform 0.3s var(--ease-out); }
+.slider__arrows button:hover:not(:disabled) { background: rgba(255, 255, 255, 0.15); transform: scale(1.06); }
+.slider__arrows button:disabled { opacity: 0.3; cursor: not-allowed; }
+
+@media (max-width: 860px) {
+  .slide__inner { grid-template-columns: 1fr; padding-block: 56px 110px; }
+  .slide__art { position: absolute; inset: 0; opacity: 0.18; pointer-events: none; }
+  .slide__art--pay, .slide__art--road { display: none; }
+  .slide__ghost { display: none; }
+}
+
+/* =========================================================
+   Buscador por camión
+   ========================================================= */
+.finder { position: relative; z-index: 2; padding-block: 8px 24px; background: linear-gradient(var(--ink) 50%, var(--paper) 50%); }
+.finder__card { display: grid; gap: 24px; padding: clamp(24px, 4vw, 44px); background: var(--ink-2); border: 1px solid var(--ink-line); border-radius: var(--radius-lg); box-shadow: 0 40px 80px -40px rgba(0, 0, 0, 0.6); }
+.finder__head h2 { margin-top: 10px; font-family: var(--font-display); font-stretch: 115%; font-weight: 800; font-size: clamp(28px, 3.6vw, 44px); letter-spacing: -0.03em; text-transform: uppercase; }
+.finder__head p:last-child { max-width: 560px; margin-top: 8px; color: var(--ink-muted); }
+.finder__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.finder__clear { margin-left: 8px; font-size: 14px; color: var(--ink-muted); text-decoration: underline; }
+.finder__clear:hover { color: var(--ink-text); }
+
+/* =========================================================
+   Grilla de categorías
+   ========================================================= */
+.categories { background: var(--paper); color: var(--text); padding-bottom: 0; }
+.categories__head { margin-bottom: 40px; }
+.categories__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+.cat-tile-wrap { height: 100%; }
+.cat-tile { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; width: 100%; height: 100%; padding: 18px; text-align: left; border-radius: var(--radius-lg); background: #fff; border: 1px solid var(--paper-line); overflow: hidden; isolation: isolate; transition: color 0.4s, border-color 0.4s, transform 0.5s var(--ease-out); }
+.cat-tile::before { content: ''; position: absolute; inset: 0; z-index: -1; background: var(--ink); transform: translateY(101%); transition: transform 0.55s var(--ease-out); }
+.cat-tile:hover { color: var(--ink-text); border-color: var(--ink); transform: translateY(-4px); }
+.cat-tile:hover::before { transform: none; }
+.cat-tile__num { font-family: var(--font-mono); font-size: 11px; color: var(--accent); }
+.cat-tile__art { width: 72%; margin: 4px auto 10px; color: var(--text); transition: transform 0.8s var(--ease-out), color 0.4s; }
+.cat-tile__art .schematic__grid line { stroke: var(--paper-line); }
+.cat-tile:hover .cat-tile__art { color: var(--ink-text); transform: rotate(-12deg) scale(1.06); }
+.cat-tile__name { font-size: 17px; font-weight: 700; }
+.cat-tile__meta { display: flex; align-items: center; justify-content: space-between; width: 100%; font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); transition: color 0.4s; }
+.cat-tile:hover .cat-tile__meta { color: var(--accent); }
+
+/* =========================================================
+   Novedades (carrusel horizontal)
+   ========================================================= */
+.arrivals { background: var(--paper); color: var(--text); padding-top: 0; }
+.arrivals .section-title { margin-bottom: 36px; }
+.carousel__track {
+  display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; cursor: grab;
+  padding-inline: max(var(--gutter), calc((100vw - var(--container)) / 2 + var(--gutter)));
+  scroll-padding-inline: max(var(--gutter), calc((100vw - var(--container)) / 2 + var(--gutter)));
+  padding-bottom: 8px;
+}
+.carousel__track::-webkit-scrollbar { display: none; }
+.carousel__track.is-grabbing { cursor: grabbing; scroll-snap-type: none; }
+.carousel__track.is-grabbing * { pointer-events: none; }
+.carousel__item { flex: 0 0 min(300px, 78vw); scroll-snap-align: start; }
+.carousel__item .result { height: 100%; }
+.carousel__bar { display: flex; align-items: center; gap: 24px; margin-top: 24px; }
+.carousel__progress { position: relative; flex: 1; height: 2px; background: var(--paper-line); }
+.carousel__progress i { position: absolute; inset: 0; background: var(--text); transform-origin: left; transition: transform 0.2s; }
+.arrivals .slider__arrows button { color: var(--text); border-color: var(--paper-line); mix-blend-mode: normal; }
+.arrivals .slider__arrows button:hover:not(:disabled) { background: var(--ink); color: var(--ink-text); }
+
+/* =========================================================
+   Franja de pagos
+   ========================================================= */
+.payments { padding-block: 28px; background: var(--ink); border-block: 1px solid var(--ink-line); }
+.payments__inner { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 32px; }
+.payments__lead { display: grid; gap: 6px; }
+.payments__lead strong { font-stretch: 115%; font-weight: 800; font-size: 18px; text-transform: uppercase; letter-spacing: -0.01em; }
+.payments__marquee .marquee__item { padding-right: 12px; }
+.pay-chip { display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 18px; border: 1px solid var(--ink-line); border-radius: 99px; font-weight: 600; white-space: nowrap; color: var(--ink-text); }
+.pay-chip svg { color: var(--ok); }
+@media (max-width: 760px) { .payments__inner { grid-template-columns: 1fr; gap: 18px; } }
+
+/* Admin: etiquetas de consultas */
+.inquiry__tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip--accent { background: var(--accent); color: var(--accent-ink); }
+.table td.mono small { display: block; font-family: var(--font-mono); }

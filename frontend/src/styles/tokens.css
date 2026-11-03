@@ -1,0 +1,37 @@
+:root {
+  /* Superficies oscuras (acero / grafito) */
+  --ink: #0e1012;
+  --ink-2: #15181b;
+  --ink-3: #1f2327;
+  --ink-line: rgba(255, 255, 255, 0.09);
+  --ink-text: #eceae4;
+  --ink-muted: #8d9197;
+
+  /* Superficies claras (papel técnico) */
+  --paper: #efede7;
+  --paper-2: #e4e1d9;
+  --paper-line: rgba(14, 16, 18, 0.12);
+  --text: #131518;
+  --muted: #62666c;
+
+  /* Señal */
+  --accent: #ff5b1f;
+  --accent-2: #ff7a45;
+  --accent-ink: #1b0b04;
+  --ok: #34c77b;
+  --warn: #f2b33d;
+  --bad: #e5484d;
+
+  --font-display: 'Archivo', 'Arial Narrow', system-ui, sans-serif;
+  --font-body: 'Archivo', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Mono', monospace;
+
+  --container: 1240px;
+  --gutter: clamp(16px, 4vw, 40px);
+  --radius: 4px;
+  --radius-lg: 10px;
+  --header-h: 112px;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+}

@@ -1,0 +1,288 @@
+{
+  "name": "Servicios Integrales Trucks",
+  "shortName": "SIT",
+  "tagline": "Repuestos para camiones multimarca",
+  "category": "Proveedor de repuestos para camiones",
+  "address": {
+    "street": "Tomás Falkner 6957",
+    "postalCode": "B7604DRN",
+    "city": "Mar del Plata",
+    "region": "Provincia de Buenos Aires",
+    "reference": "Sobre Av. Monseñor Zabala, a metros de la Ruta 2",
+    "plusCode": "2CPC+X9"
+  },
+  "geo": {
+    "lat": -37.9625654,
+    "lng": -57.5790386
+  },
+  "phone": {
+    "display": "0223 623-5705",
+    "tel": "+542236235705",
+    "whatsapp": "5492236235705"
+  },
+  "sellers": [
+    {
+      "name": "Mostrador",
+      "role": "Ventas y consultas",
+      "whatsapp": "5492236235705"
+    }
+  ],
+  "mapsUrl": "https://maps.app.goo.gl/qjfeKJfxdDXi6ALcA",
+  "hours": [
+    {
+      "day": 1,
+      "label": "Lunes",
+      "open": "08:00",
+      "close": "17:00"
+    },
+    {
+      "day": 2,
+      "label": "Martes",
+      "open": "08:00",
+      "close": "17:00"
+    },
+    {
+      "day": 3,
+      "label": "Miércoles",
+      "open": "08:00",
+      "close": "17:00"
+    },
+    {
+      "day": 4,
+      "label": "Jueves",
+      "open": "08:00",
+      "close": "17:00"
+    },
+    {
+      "day": 5,
+      "label": "Viernes",
+      "open": "08:00",
+      "close": "17:00"
+    },
+    {
+      "day": 6,
+      "label": "Sábado",
+      "open": "09:00",
+      "close": "12:00"
+    },
+    {
+      "day": 0,
+      "label": "Domingo",
+      "open": null,
+      "close": null
+    }
+  ],
+  "dispatch": {
+    "sameDay": true,
+    "cutoffs": {
+      "1": "16:00",
+      "2": "16:00",
+      "3": "16:00",
+      "4": "16:00",
+      "5": "16:00",
+      "6": "11:00"
+    }
+  },
+  "payments": [
+    "Efectivo",
+    "Transferencia",
+    "Mercado Pago",
+    "Tarjeta de débito",
+    "Tarjeta de crédito"
+  ],
+  "brands": [
+    {
+      "id": "iveco",
+      "name": "IVECO",
+      "claim": "Línea liviana, mediana y pesada",
+      "models": [
+        "Daily",
+        "EuroCargo",
+        "Tector",
+        "Stralis",
+        "Cursor",
+        "Hi-Way",
+        "S-Way",
+        "Trakker"
+      ],
+      "image": "/img/brands/iveco-sway.webp",
+      "credit": {
+        "author": "JoachimKohler-HB",
+        "license": "CC BY-SA 4.0",
+        "url": "https://commons.wikimedia.org/wiki/File:IVECO_S-Way_530_(2024).jpg"
+      },
+      "gallery": [
+        {
+          "model": "Stralis",
+          "image": "/img/brands/iveco-stralis.webp",
+          "credit": {
+            "author": "JoachimKohler-HB",
+            "license": "CC BY-SA 4.0",
+            "url": "https://commons.wikimedia.org/wiki/File:IVECO_Stralis_500_(Vorarlberg,_2018).jpg"
+          }
+        },
+        {
+          "model": "Daily",
+          "image": "/img/brands/iveco-daily.webp",
+          "credit": {
+            "author": "Matti Blume",
+            "license": "CC BY-SA 4.0",
+            "url": "https://commons.wikimedia.org/wiki/File:Nufam_2023,_Rheinstetten_(P1130520).jpg"
+          }
+        },
+        {
+          "model": "Tector",
+          "image": "/img/brands/iveco-tector.webp",
+          "credit": {
+            "author": "Just a Man",
+            "license": "CC BY 4.0",
+            "url": "https://commons.wikimedia.org/wiki/File:Iveco_Tector_150E21_de_la_Policía_de_la_Ciudad_de_Buenos_Aires.jpg"
+          }
+        }
+      ]
+    },
+    {
+      "id": "mercedes",
+      "name": "Mercedes-Benz",
+      "claim": "Utilitarios, camiones y tractores",
+      "models": [
+        "Sprinter",
+        "Accelo",
+        "Atego",
+        "Axor",
+        "Actros",
+        "L 1114",
+        "L 1620",
+        "L 1634"
+      ],
+      "image": "/img/brands/mb-actros.webp",
+      "credit": {
+        "author": "JoachimKohler-HB",
+        "license": "CC BY-SA 4.0",
+        "url": "https://commons.wikimedia.org/wiki/File:Mercedes-Benz_Actros_1845_(Schmalz_+_Schön).jpg"
+      },
+      "gallery": [
+        {
+          "model": "Atego",
+          "image": "/img/brands/mb-atego.webp",
+          "credit": {
+            "author": "JoachimKohler-HB",
+            "license": "CC BY-SA 4.0",
+            "url": "https://commons.wikimedia.org/wiki/File:Mercedes-Benz_Atego_1324.jpg"
+          }
+        }
+      ]
+    },
+    {
+      "id": "scania",
+      "name": "Scania",
+      "claim": "Series 4, 5 y NTG",
+      "models": [
+        "Serie 4",
+        "Serie 5 / PGR",
+        "Serie 6/7 NTG",
+        "112 / 113"
+      ],
+      "image": "/img/brands/scania-r.webp",
+      "credit": {
+        "author": "Ctirad13",
+        "license": "CC BY-SA 4.0",
+        "url": "https://commons.wikimedia.org/wiki/File:Scania_R590.jpg"
+      }
+    },
+    {
+      "id": "volvo",
+      "name": "Volvo",
+      "claim": "Ruta y distribución",
+      "models": [
+        "FH",
+        "FM",
+        "VM",
+        "NH",
+        "NL"
+      ],
+      "image": "/img/brands/volvo-fh.webp",
+      "credit": {
+        "author": "JoachimKohler-HB",
+        "license": "CC BY-SA 4.0",
+        "url": "https://commons.wikimedia.org/wiki/File:Volvo_FH_500_in_Frauenfeld.jpg"
+      }
+    },
+    {
+      "id": "ford",
+      "name": "Ford",
+      "claim": "Línea Cargo",
+      "models": [
+        "Cargo",
+        "F-4000",
+        "F-14000"
+      ],
+      "image": "/img/brands/ford-cargo.webp",
+      "credit": {
+        "author": "order_242 from Chile",
+        "license": "CC BY-SA 2.0",
+        "url": "https://commons.wikimedia.org/wiki/File:Ford_Cargo_1933_2014_(14115303917).jpg"
+      }
+    },
+    {
+      "id": "volkswagen",
+      "name": "Volkswagen",
+      "claim": "Constellation, Worker y Delivery",
+      "models": [
+        "Constellation",
+        "Worker",
+        "Delivery"
+      ],
+      "image": "/img/brands/vw-constellation.webp",
+      "credit": {
+        "author": "order_242 from Chile",
+        "license": "CC BY-SA 2.0",
+        "url": "https://commons.wikimedia.org/wiki/File:Volkswagen_17.330_Constellation_2014_(14245605193).jpg"
+      }
+    },
+    {
+      "id": "agrale",
+      "name": "Agrale",
+      "claim": "Livianos y medianos",
+      "models": [
+        "8700",
+        "6000"
+      ]
+    }
+  ],
+  "vehicleYears": {
+    "from": 1990
+  },
+  "rating": {
+    "value": 5,
+    "count": 8,
+    "source": "Google"
+  },
+  "reviews": [
+    {
+      "author": "Nahuel T.",
+      "text": "Excelente servicio, me llegó el pedido más rápido de lo que esperaba!",
+      "rating": 5
+    },
+    {
+      "author": "Nicolás C.",
+      "text": "Excelente atención y repuestos de confianza.",
+      "rating": 5
+    },
+    {
+      "author": "Julián F.",
+      "text": "Excelente atención, buen precio en relación al mercado.",
+      "rating": 5
+    },
+    {
+      "author": "Emanuel I.",
+      "text": "Genios, excelente atención y buenos precios.",
+      "rating": 5
+    },
+    {
+      "author": "Cliente en Google",
+      "text": "Buena atención personal y telefónicamente.",
+      "rating": 5
+    }
+  ]
+}
