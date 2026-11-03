@@ -9,15 +9,13 @@ import WhatsAppFab from './components/WhatsAppFab.jsx';
 import { BusinessProvider } from './hooks/useBusiness.jsx';
 import { RouterProvider, useRouter } from './hooks/useRouter.jsx';
 import { VehicleProvider } from './hooks/useVehicle.jsx';
-import { IS_STATIC } from './services/api.js';
 
 // El panel se carga aparte: el visitante de la tienda no descarga su código.
 const Admin = lazy(() => import('./pages/Admin.jsx'));
 
 function Routes() {
   const { path } = useRouter();
-  // En la demo estática (GitHub Pages) no hay servidor, así que tampoco panel de administración.
-  if (path === '/admin' && !IS_STATIC) return <Suspense fallback={null}><Admin /></Suspense>;
+  if (path === '/admin') return <Suspense fallback={null}><Admin /></Suspense>;
 
   let page;
   if (path === '/') page = <Home />;

@@ -21,7 +21,9 @@ export default function VehicleFinder() {
   );
   const matches = data?.total;
   const wa = whatsappLink(business, buildMessage({ vehicle }));
-  const photo = business?.brands?.find((b) => b.name === vehicle.brand)?.image;
+  const brand = business?.brands?.find((b) => b.name === vehicle.brand);
+  const photo = brand?.gallery?.find((g) => g.model === vehicle.model)?.image || brand?.image;
+  const single = business?.brands?.length === 1;
 
   return (
     <section className="finder" id="buscador">
@@ -30,16 +32,16 @@ export default function VehicleFinder() {
           {photo && <img key={photo} className="finder__photo" src={photo.replace('.webp', '-sm.webp')} alt="" />}
           <div className="finder__head">
             <p className="eyebrow"><span className="tick" /> Tu camión</p>
-            <h2>¿Qué camión tenés?</h2>
-            <p>Elegí marca, modelo y año: te llevamos al catálogo con los filtros aplicados y el mensaje de WhatsApp sale con los datos de la unidad.</p>
+            <h2>{single ? `¿Qué ${vehicle.brand || 'IVECO'} tenés?` : '¿Qué camión tenés?'}</h2>
+            <p>{single ? 'Elegí modelo y año' : 'Elegí marca, modelo y año'}: te llevamos al catálogo con los filtros aplicados y el mensaje de WhatsApp sale con los datos de la unidad.</p>
           </div>
           <VehicleSelect value={vehicle} onChange={setVehicle} dark />
           <div className="finder__actions">
             <button className="btn btn--accent btn--lg" disabled={!vehicle.brand} onClick={() => navigate(vehicleUrl(vehicle))}>
-              {vehicle.brand ? <>Ver {matches ?? ''} {matches === 1 ? 'repuesto' : 'repuestos'}</> : 'Elegí una marca'} <Icon name="arrow" size={18} />
+              {vehicle.brand ? <>Ver {matches ?? ''} {matches === 1 ? 'repuesto' : 'repuestos'}{vehicle.model ? ` para ${vehicle.model}` : ''}</> : 'Elegí una marca'} <Icon name="arrow" size={18} />
             </button>
             {wa && <a className="btn btn--ghost btn--lg" href={wa} target="_blank" rel="noreferrer"><Icon name="whatsapp" size={18} /> Consultar con estos datos</a>}
-            {vehicle.brand && <button className="finder__clear" onClick={clearVehicle}>Limpiar</button>}
+            {(single ? vehicle.model || vehicle.year : vehicle.brand) && <button className="finder__clear" onClick={clearVehicle}>Limpiar</button>}
           </div>
         </Reveal>
       </div>

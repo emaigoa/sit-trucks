@@ -31,7 +31,33 @@ function BrandSlide({ brand, index }) {
   );
 }
 
-/** Slide "multimarca": mosaico con el resto de las marcas. */
+/** Slide de modelos: mosaico con fotos reales de cada modelo de la marca. */
+function ModelsSlide({ brand, index }) {
+  // Primero los modelos con foto propia; el de la foto principal va al final.
+  const shots = [...(brand.gallery || [])].filter((g) => g.image).sort((a, b) => Number(a.image === brand.image) - Number(b.image === brand.image)).slice(0, 4);
+  return (
+    <article className="slide slide--dark">
+      <div className="container slide__inner">
+        <div className="slide__copy">
+          <p className="slide__kicker"><span>{String(index + 1).padStart(2, '0')}</span> Modelos {brand.name}</p>
+          <h2 className="slide__title">De la Daily<br />al Stralis</h2>
+          <p className="slide__text">Repuestos para {brand.models.join(', ')}. Si no lo ves publicado, lo conseguimos.</p>
+          <Link className="btn btn--accent btn--lg slide__cta" to={catalogUrl({})}>Ver todo el catálogo <Icon name="arrow" size={18} /></Link>
+        </div>
+        <div className="slide__mosaic">
+          {shots.map((g, i) => (
+            <Link key={g.model} to={catalogUrl({ modelo: g.model })} className="mosaic-tile" style={{ '--i': i }}>
+              <img src={sm(g.image)} alt="" loading="lazy" />
+              <span>{brand.name} {g.model}</span>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </article>
+  );
+}
+
+/** Slide "multimarca": mosaico con el resto de las marcas (solo si se cargan varias marcas). */
 function MultiBrandSlide({ brands, index }) {
   return (
     <article className="slide slide--dark">
@@ -39,16 +65,8 @@ function MultiBrandSlide({ brands, index }) {
         <div className="slide__copy">
           <p className="slide__kicker"><span>{String(index + 1).padStart(2, '0')}</span> Multimarca</p>
           <h2 className="slide__title">Y también<br />{brands.length} marcas más</h2>
-          <p className="slide__text">Trabajamos repuestos para {brands.map((b) => b.name).join(', ')}. Si no lo ves publicado, lo conseguimos.</p>
+          <p className="slide__text">Trabajamos repuestos para {brands.map((b) => b.name).join(', ')}.</p>
           <Link className="btn btn--accent btn--lg slide__cta" to="/catalogo">Ver todo el catálogo <Icon name="arrow" size={18} /></Link>
-        </div>
-        <div className="slide__mosaic">
-          {brands.filter((b) => b.image).slice(0, 4).map((b, i) => (
-            <Link key={b.id} to={catalogUrl({ marca: b.name })} className="mosaic-tile" style={{ '--i': i }}>
-              <img src={sm(b.image)} alt="" loading="lazy" />
-              <span>{b.name}</span>
-            </Link>
-          ))}
         </div>
       </div>
     </article>
@@ -110,8 +128,10 @@ export default function Showcase() {
   if (!b?.brands?.length) return null;
   const featured = b.brands.filter((x) => x.image).slice(0, 2);
   const rest = b.brands.filter((x) => !featured.includes(x));
+  const single = b.brands.length === 1 ? b.brands[0] : null;
   const slides = [
     ...featured.map((brand) => (i) => <BrandSlide key={brand.id} brand={brand} index={i} />),
+    ...(single?.gallery?.length > 1 ? [(i) => <ModelsSlide key="models" brand={single} index={i} />] : []),
     ...(rest.length ? [(i) => <MultiBrandSlide key="multi" brands={rest} index={i} />] : []),
     (i) => <DispatchSlide key="dispatch" business={b} index={i} />,
     ...(b.payments?.length ? [(i) => <PaymentsSlide key="pay" business={b} index={i} />] : []),

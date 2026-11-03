@@ -21,7 +21,7 @@
 .ask-btn { position: relative; z-index: 2; }
 
 /* ---------- Banner de marca ---------- */
-.brand-banner { position: relative; display: flex; align-items: flex-end; min-height: 240px; margin-bottom: 20px; border-radius: var(--radius-lg); overflow: hidden; background: var(--ink); color: var(--ink-text); isolation: isolate; animation: fade-up 0.6s var(--ease-out) both; }
+.brand-banner { position: relative; display: flex; align-items: flex-end; min-height: 240px; margin-bottom: 20px; border-radius: var(--radius-lg); overflow: hidden; background: var(--ink); color: var(--ink-text); isolation: isolate; animation: rise-in 0.6s var(--ease-out) both; }
 .brand-banner img { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; object-position: center 60%; animation: banner-zoom 14s ease-out both; }
 .brand-banner::before { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, rgba(14, 16, 18, 0.92) 0%, rgba(14, 16, 18, 0.6) 45%, rgba(14, 16, 18, 0.05) 100%); }
 .brand-banner--plain { min-height: 180px; background: linear-gradient(120deg, var(--ink) 0%, var(--ink-3) 100%); }
@@ -33,7 +33,7 @@
 .brand-banner li a:hover { border-color: var(--accent); }
 .brand-banner li a.is-on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink) !important; }
 @keyframes banner-zoom { from { transform: scale(1.08); } }
-@keyframes fade-up { from { opacity: 0; transform: translateY(12px); } }
+@keyframes rise-in { from { opacity: 0; transform: translateY(12px); } }
 
 /* ---------- Layout catálogo ---------- */
 .catalog-layout { display: grid; grid-template-columns: 272px minmax(0, 1fr); gap: 28px; align-items: start; }
@@ -180,7 +180,7 @@
    ========================================================= */
 .pdp-main { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(320px, 1fr); gap: 0; background: #fff; border-radius: var(--radius-lg); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08); overflow: hidden; }
 .pdp-gallery { --zx: 50%; --zy: 50%; position: relative; display: grid; place-items: center; min-height: 460px; padding: 28px; overflow: hidden; cursor: zoom-in; border-right: 1px solid var(--paper-line); }
-.pdp-gallery .product-image { width: 100%; max-height: 560px; object-fit: contain; transform-origin: var(--zx) var(--zy); transition: transform 0.35s var(--ease-out); animation: fade-up 0.5s var(--ease-out) both; }
+.pdp-gallery .product-image { width: 100%; max-height: 560px; object-fit: contain; transform-origin: var(--zx) var(--zy); transition: transform 0.35s var(--ease-out); animation: rise-in 0.5s var(--ease-out) both; }
 .pdp-gallery:hover img.product-image { transform: scale(1.9); }
 .pdp-gallery .product-image--drawn { width: 60%; color: var(--text); }
 .pdp-gallery .product-image--drawn .schematic__grid line { stroke: var(--paper-line); }
@@ -271,7 +271,7 @@
 .mosaic-tile:hover img { transform: scale(1.07); }
 @media (max-width: 860px) { .slide__mosaic { display: none; } .slide__credit { bottom: 84px; } }
 
-.brands { background: var(--paper); color: var(--text); padding-bottom: 0; }
+.brands { background: var(--paper); color: var(--text); }
 .brands__head { margin-bottom: 40px; }
 .brands__grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 12px; }
 .brand-tile-wrap { height: 100%; grid-column: span 2; }
@@ -309,3 +309,16 @@ body:has(.catalog-side.is-open) .wa { display: none; }
 .brand-tile { container-type: inline-size; }
 .brand-tile-wrap:not(.is-big) .brand-tile strong { font-size: min(26px, 12.5cqi); font-stretch: 110%; }
 .result--list .result__media { grid-row: span 2; align-self: start; }
+
+/* Modelos (sitio monomarca): 4 columnas, primero los que tienen foto */
+.brands__grid--models { grid-template-columns: repeat(4, 1fr); }
+.brands__grid--models .brand-tile-wrap { grid-column: auto; }
+.brands__grid--models .brand-tile { min-height: 260px; }
+.brands__grid--models .brand-tile--plain { min-height: 150px; }
+.brand-tile__kicker { font-family: var(--font-mono); font-size: 11px !important; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent) !important; }
+@media (max-width: 900px) { .brands__grid--models { grid-template-columns: 1fr 1fr; } .brands__grid--models .brand-tile { min-height: 200px; } .brands__grid--models .brand-tile--plain { min-height: 120px; } }
+@media (max-width: 420px) {
+  .site-header__inner { gap: 12px; }
+  .site-header__actions { gap: 8px; }
+  .arrivals__head { flex-wrap: wrap; }
+}

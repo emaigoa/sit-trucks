@@ -72,8 +72,23 @@ const count = (items, keyFn) => {
   return [...map].map(([value, total]) => ({ value, count: total })).sort((a, b) => b.count - a.count || a.value.localeCompare(b.value, 'es'));
 };
 
+/**
+ * Contador por modelo igual a lo que devuelve el filtro: un repuesto cargado solo con la marca
+ * ("IVECO") sirve para todos sus modelos, así que suma en cada uno.
+ */
+function modelFacet(items, business, brand) {
+  const known = business.brands?.find((b) => b.name === brand)?.models || [];
+  const models = [...new Set([...known, ...items.flatMap((p) => modelsOf(p, brand))])];
+  return models
+    .map((m) => ({ value: m, count: items.filter((p) => fitsVehicle(p, brand, m)).length }))
+    .filter((m) => m.count > 0)
+    .sort((a, b) => b.count - a.count || a.value.localeCompare(b.value, 'es'));
+}
+
 export function searchCatalog(items, business, query = {}) {
   const brandNames = (business.brands || []).map((b) => b.name).sort((a, b) => b.length - a.length);
+  // Con una sola marca (sitio monomarca) el modelo se puede filtrar sin elegir la marca antes.
+  const single = brandNames.length === 1 ? brandNames[0] : '';
 
   const q = String(one(query.q)).trim().slice(0, 80);
   const tokens = fold(q).split(/\s+/).filter(Boolean);
@@ -90,7 +105,8 @@ export function searchCatalog(items, business, query = {}) {
 
   const filtered = items.filter((p) => {
     if (f.categoria && p.category !== f.categoria) return false;
-    if (f.marca && !fitsVehicle(p, f.marca, f.modelo)) return false;
+    const vehicleBrand = f.marca || (f.modelo ? single : '');
+    if (vehicleBrand && !fitsVehicle(p, vehicleBrand, f.modelo)) return false;
     if (f.fabricante && p.manufacturer !== f.fabricante) return false;
     if (f.tipo && p.origin !== f.tipo) return false;
     if (f.hoy && !(p.stock > 0)) return false;
@@ -114,8 +130,8 @@ export function searchCatalog(items, business, query = {}) {
 
   const facets = {
     categoria: f.categoria ? [] : count(filtered, (p) => p.category),
-    marca: f.marca ? [] : count(filtered, (p) => brandsOf(p, brandNames)),
-    modelo: f.marca && !f.modelo ? count(filtered, (p) => modelsOf(p, f.marca)) : [],
+    marca: f.marca || single ? [] : count(filtered, (p) => brandsOf(p, brandNames)),
+    modelo: (f.marca || single) && !f.modelo ? modelFacet(filtered, business, f.marca || single) : [],
     fabricante: f.fabricante ? [] : count(filtered, (p) => p.manufacturer),
     tipo: f.tipo ? [] : count(filtered, (p) => p.origin),
     hoy: filtered.filter((p) => p.stock > 0).length,

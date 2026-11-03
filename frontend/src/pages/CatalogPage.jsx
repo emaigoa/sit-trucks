@@ -50,19 +50,23 @@ export default function CatalogPage() {
   const categoria = params.get('categoria') || '';
 
   // El camión de los filtros pasa a ser "el camión del visitante" para los mensajes de WhatsApp.
-  useEffect(() => { if (marca) setVehicle({ brand: marca, model: modelo, year: anio }); }, [marca, modelo, anio, setVehicle]);
+  // Sitio monomarca (IVECO): la marca está implícita aunque no venga en la URL.
+  const single = business?.brands?.length === 1 ? business.brands[0].name : '';
+  const vehicleBrand = marca || single;
+  useEffect(() => { if (marca || modelo) setVehicle({ brand: vehicleBrand, model: modelo, year: anio }); }, [marca, modelo, anio, vehicleBrand, setVehicle]);
   useEffect(() => { setFiltersOpen(false); }, [search]);
   useEffect(() => {
     document.body.style.overflow = filtersOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
   }, [filtersOpen]);
 
-  const heading = q ? q.charAt(0).toUpperCase() + q.slice(1) : [categoria || 'Repuestos', marca && `para ${[marca, modelo, anio].filter(Boolean).join(' ')}`].filter(Boolean).join(' ');
+  const vehicleText = [vehicleBrand, modelo, anio].filter(Boolean).join(' ');
+  const heading = q ? q.charAt(0).toUpperCase() + q.slice(1) : `${categoria || 'Repuestos'}${vehicleText ? `${single ? ' ' : ' para '}${vehicleText}` : ''}`;
   useDocumentTitle(heading);
 
-  const brand = business?.brands?.find((b) => b.name === marca);
+  const brand = business?.brands?.find((b) => b.name === vehicleBrand);
   const activeCount = ['q', 'categoria', 'marca', 'fabricante', 'tipo', 'hoy'].filter((k) => params.get(k)).length;
-  const askWa = whatsappLink(business, buildMessage({ vehicle: { brand: marca, model: modelo, year: anio }, extra: q ? `Busco: ${q}.` : categoria ? `Busco repuestos de ${categoria.toLowerCase()}.` : '' }));
+  const askWa = whatsappLink(business, buildMessage({ vehicle: { brand: vehicleBrand, model: modelo, year: anio }, extra: q ? `Busco: ${q}.` : categoria ? `Busco repuestos de ${categoria.toLowerCase()}.` : '' }));
 
   return (
     <div className="catalog-page">
@@ -71,7 +75,8 @@ export default function CatalogPage() {
           <Link to="/">Inicio</Link>
           <span>›</span>
           <Link to="/catalogo">Catálogo</Link>
-          {marca && <><span>›</span><Link to={withParams('', { marca })}>{marca}</Link></>}
+          {marca && marca !== single && <><span>›</span><Link to={withParams('', { marca })}>{marca}</Link></>}
+          {modelo && <><span>›</span><Link to={withParams('', { modelo })}>{[single, modelo].filter(Boolean).join(' ')}</Link></>}
           {categoria && <><span>›</span><span aria-current="page">{categoria}</span></>}
         </nav>
 
@@ -88,8 +93,8 @@ export default function CatalogPage() {
                 <h1>{heading}</h1>
                 <p>{data ? plural(data.total, 'resultado', 'resultados') : '…'}</p>
               </div>
-              <AppliedFilters />
-              {data && <FiltersPanel data={data} dispatch={dispatch} />}
+              <AppliedFilters singleBrand={single} />
+              {data && <FiltersPanel data={data} dispatch={dispatch} brandName={single} />}
             </div>
           </aside>
 

@@ -3,6 +3,7 @@ import Brand from './Brand.jsx';
 import { useBusiness } from '../hooks/useBusiness.jsx';
 import { groupedHours } from '../utils/business.js';
 import { IS_STATIC } from '../services/api.js';
+import { Link } from '../hooks/useRouter.jsx';
 
 export default function Footer() {
   const b = useBusiness();
@@ -11,7 +12,7 @@ export default function Footer() {
       <div className="container site-footer__grid">
         <div>
           <Brand compact />
-          <p className="site-footer__claim">Repuestos para camiones.<br />Atención directa, de mostrador.</p>
+          <p className="site-footer__claim">Repuestos IVECO.<br />Atención directa, de mostrador.</p>
         </div>
         {b && (
           <>
@@ -32,7 +33,7 @@ export default function Footer() {
       </div>
       <div className="container site-footer__legal">
         <span>© {new Date().getFullYear()} Servicios Integrales Trucks</span>
-        {IS_STATIC ? <span>Prototipo · datos de ejemplo</span> : <a href="/admin">Acceso administración</a>}
+        <Link to="/admin">{IS_STATIC ? 'Panel admin (demo)' : 'Acceso administración'}</Link>
       </div>
     </footer>
   );

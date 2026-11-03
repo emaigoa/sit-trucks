@@ -60,7 +60,7 @@ export default function ProductForm({ product, categories, origins = ['Original'
             {errors.origin && <small>{errors.origin}</small>}
           </label>
           {field('badge', 'Etiqueta (opcional)')}
-          {field('compatibility', 'Compatible con, separado por comas (ej: IVECO, Mercedes-Benz Atego)', { full: true })}
+          {field('compatibility', 'Compatible con, separado por comas (ej: IVECO = toda la línea, IVECO Daily, IVECO Tector)', { full: true })}
           {field('image', 'URL de foto (opcional)', { full: true })}
           {field('thumb', 'URL de miniatura (opcional, para el listado)', { full: true })}
           {field('description', 'Descripción', { full: true, textarea: true })}

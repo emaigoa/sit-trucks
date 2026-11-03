@@ -4,7 +4,6 @@ import CategoryTicker from '../sections/CategoryTicker.jsx';
 import Showcase from '../sections/Showcase.jsx';
 import VehicleFinder from '../sections/VehicleFinder.jsx';
 import Brands from '../sections/Brands.jsx';
-import Categories from '../sections/Categories.jsx';
 import NewArrivals from '../sections/NewArrivals.jsx';
 import Payments from '../sections/Payments.jsx';
 import Process from '../sections/Process.jsx';
@@ -25,8 +24,7 @@ export default function Home() {
       <CategoryTicker />
       <Showcase />
       <VehicleFinder />
-      <Brands counts={facets?.marca} />
-      <Categories categories={overview.data?.categories} counts={facets?.categoria} />
+      <Brands counts={facets?.marca} modelCounts={facets?.modelo} />
       <NewArrivals />
       <Payments />
       <Process />

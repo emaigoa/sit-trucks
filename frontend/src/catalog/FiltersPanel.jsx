@@ -40,14 +40,14 @@ function DispatchToggle({ active, count, dispatch }) {
   );
 }
 
-export default function FiltersPanel({ data, dispatch }) {
+export default function FiltersPanel({ data, dispatch, brandName = '' }) {
   const { facets, query } = data;
   return (
     <div className="filters">
       <DispatchToggle active={query.hoy} count={facets.hoy} dispatch={dispatch} />
       <FacetGroup title="Categorías" param="categoria" options={facets.categoria} />
       <FacetGroup title="Marca del camión" param="marca" options={facets.marca} />
-      <FacetGroup title={`Modelo ${query.marca}`} param="modelo" options={facets.modelo} />
+      <FacetGroup title={`Modelo ${query.marca || brandName}`.trim()} param="modelo" options={facets.modelo} />
       <FacetGroup title="Marca del repuesto" param="fabricante" options={facets.fabricante} />
       <FacetGroup title="Tipo de repuesto" param="tipo" options={facets.tipo} />
     </div>

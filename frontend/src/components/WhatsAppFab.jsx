@@ -49,7 +49,7 @@ export default function WhatsAppFab() {
       {bubble && (
         <div className="wa__bubble" role="dialog" aria-label="Asistencia por WhatsApp">
           <button className="wa__close" onClick={close} aria-label="Cerrar"><Icon name="close" size={14} /></button>
-          <p><strong>¿Buscás un repuesto{vehicle.brand ? ` para tu ${vehicle.brand}` : ''}?</strong> Pasanos modelo y año del camión y te confirmamos stock en el momento.</p>
+          <p><strong>¿Buscás un repuesto para tu {[vehicle.brand || 'IVECO', vehicle.model].filter(Boolean).join(' ')}?</strong> Pasanos modelo y año del camión y te confirmamos stock en el momento.</p>
           {sellers.length > 1 ? (
             <div className="wa__sellers">
               {sellers.map((s) => (

@@ -4,7 +4,8 @@ import Icon from '../components/Icon.jsx';
 import AdminLogin from '../admin/AdminLogin.jsx';
 import ProductsPanel from '../admin/ProductsPanel.jsx';
 import InquiriesPanel from '../admin/InquiriesPanel.jsx';
-import { adminToken } from '../services/api.js';
+import { adminToken, IS_STATIC } from '../services/api.js';
+import { href } from '../hooks/useRouter.jsx';
 
 const tabs = [
   { id: 'products', label: 'Repuestos', icon: 'box' },
@@ -33,11 +34,12 @@ export default function Admin() {
           ))}
         </nav>
         <div className="admin__side-foot">
-          <a href="/">Ver sitio <Icon name="arrowUpRight" size={15} /></a>
+          <a href={href('/')}>Ver sitio <Icon name="arrowUpRight" size={15} /></a>
           <button onClick={logout}><Icon name="logout" size={17} /> Salir</button>
         </div>
       </aside>
       <main className="admin__main">
+        {IS_STATIC && <p className="admin-demo"><strong>Modo demo.</strong> Podés probar todo: los cambios se ven en el catálogo mientras navegás, pero no se guardan y se pierden al recargar la página.</p>}
         {tab === 'products' ? <ProductsPanel onUnauthorized={onUnauthorized} /> : <InquiriesPanel onUnauthorized={onUnauthorized} />}
       </main>
     </div>

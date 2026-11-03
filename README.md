@@ -1,6 +1,6 @@
 # Servicios Integrales Trucks
 
-Sitio de repuestos para camiones — Tomás Falkner 6957, Mar del Plata.
+Sitio de repuestos **IVECO** — Tomás Falkner 6957, Mar del Plata.
 
 ```
 frontend/   React + Vite (tienda + panel admin)
@@ -31,8 +31,9 @@ npm start       # el backend sirve la API y el front en el mismo puerto
 
 Cada push a `main` publica el prototipo con `.github/workflows/pages.yml`. Es un build **estático**
 (`VITE_STATIC=1`): no hay servidor, el catálogo corre en el navegador con los datos de
-`backend/data/*.json` y la misma lógica de búsqueda (`shared/catalog.js`). En ese modo el panel admin
-y el formulario de consultas están desactivados (las consultas van por WhatsApp).
+`backend/data/*.json` y la misma lógica de búsqueda (`shared/catalog.js`). En ese modo:
+- el panel admin (`/admin`) es una demo: entra con cualquier clave y los cambios viven en memoria (se ven en el catálogo hasta recargar);
+- el formulario de contacto se reemplaza por un botón de WhatsApp.
 
 Para el sitio real con admin y consultas, desplegar el backend (`npm run build && npm start`) en un
 hosting de Node (Render, Railway, VPS…).
@@ -57,14 +58,16 @@ Auth admin: header `Authorization: Bearer <ADMIN_TOKEN>`.
 ## Dónde editar
 
 - Datos del negocio (teléfono, WhatsApp, horarios, reseñas): `backend/data/business.json`
-  - `brands`: marcas y modelos del buscador por camión y del slider
+  - `brands`: marcas y modelos. Hoy hay una sola (IVECO): con una sola marca el sitio entra en modo monomarca
+    (el buscador pide solo modelo y año, el catálogo filtra por modelo directo y la home muestra los modelos).
+    `brands[].gallery`: fotos por modelo, usadas en el banner del catálogo, el slider y la sección Modelos
   - `dispatch.cutoffs`: hora de corte del despacho en el día (clave = día, 0 domingo … 6 sábado)
   - `payments`: medios de pago mostrados
   - `sellers`: vendedores de WhatsApp (con más de uno, la burbuja deja elegir)
 - Compatibilidad de un repuesto: `"IVECO"` cubre toda la marca, `"IVECO Tector"` solo ese modelo
   - `brands[].image` / `credit`: foto de la marca (en `frontend/public/img/brands/`, versión `-sm.webp` para mobile) y su atribución Creative Commons, que se muestra sobre la foto
 - Catálogo inicial: `backend/data/products.json` (o desde el panel admin)
-  - **Datos de prueba**: ~320 artículos tomados del catálogo público de Repuestos Grasso (nombre, código OEM, foto enlazada a su sitio). Stock, marca del repuesto y tipo son inventados para probar filtros y orden. Reemplazar antes de publicar.
+  - **Datos de prueba**: 114 artículos IVECO tomados del catálogo público de Repuestos Grasso (nombre, código OEM, foto enlazada a su sitio). Stock, marca del repuesto y tipo son inventados para probar filtros y orden. Reemplazar antes de publicar.
   - Los precios **no se publican**: cada repuesto tiene un botón "Consultar precio" que abre WhatsApp con el mensaje armado (repuesto, código, OEM, camión del cliente y link a la ficha). El texto se arma en `buildMessage` (`frontend/src/utils/business.js`).
   - Campos: `manufacturer` (marca del repuesto), `origin` (`Original` | `Alternativo`), `thumb` (miniatura del listado)
 - Colores y tipografías: `frontend/src/styles/tokens.css`

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-/** Alterna palabras con un giro vertical (ej. "IVECO" ↔ "Mercedes-Benz"). */
+/** Alterna palabras con un giro vertical (ej. "Daily" ↔ "Tector"). */
 export default function RotatingWord({ words, interval = 2600 }) {
   const [i, setI] = useState(0);
   useEffect(() => {

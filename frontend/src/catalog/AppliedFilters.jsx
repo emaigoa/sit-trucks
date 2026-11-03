@@ -4,7 +4,7 @@ import { Link, useRouter } from '../hooks/useRouter.jsx';
 import { withParams } from '../utils/catalogUrl.js';
 
 /** Filtros aplicados como chips removibles + "Limpiar filtros". */
-export default function AppliedFilters() {
+export default function AppliedFilters({ singleBrand = '' }) {
   const { params, search } = useRouter();
   const get = (k) => params.get(k) || '';
   const chips = [];
@@ -12,7 +12,8 @@ export default function AppliedFilters() {
 
   if (get('q')) add(`“${get('q')}”`, { q: '' });
   if (get('categoria')) add(get('categoria'), { categoria: '' });
-  if (get('marca')) add(get('marca'), { marca: '', modelo: '', anio: '' });
+  // En un sitio monomarca la marca no es un filtro real: no se muestra como chip.
+  if (get('marca') && get('marca') !== singleBrand) add(get('marca'), { marca: '', modelo: '', anio: '' });
   if (get('modelo')) add(`Modelo ${get('modelo')}`, { modelo: '' });
   if (get('anio')) add(`Año ${get('anio')}`, { anio: '' });
   if (get('fabricante')) add(get('fabricante'), { fabricante: '' });

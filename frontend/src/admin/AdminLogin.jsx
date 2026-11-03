@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Brand from '../components/Brand.jsx';
-import { adminToken, api } from '../services/api.js';
+import { adminToken, api, IS_STATIC } from '../services/api.js';
+import { href } from '../hooks/useRouter.jsx';
 
 export default function AdminLogin({ onSuccess }) {
   const [token, setToken] = useState('');
@@ -28,14 +29,16 @@ export default function AdminLogin({ onSuccess }) {
       <form className="admin-login__card" onSubmit={submit}>
         <Brand compact />
         <h1>Panel de administración</h1>
-        <p>Ingresá el token configurado en <code>ADMIN_TOKEN</code> del backend.</p>
+        {IS_STATIC
+          ? <p className="admin-login__demo">Versión de demostración: ingresá con <strong>cualquier clave</strong>. Los cambios no se guardan.</p>
+          : <p>Ingresá el token configurado en <code>ADMIN_TOKEN</code> del backend.</p>}
         <label className="field">
           <span>Token</span>
           <input type="password" value={token} onChange={(e) => setToken(e.target.value)} autoFocus autoComplete="current-password" />
         </label>
         {error && <span className="form-error">{error}</span>}
         <button className="btn btn--accent btn--block" disabled={busy || !token}>{busy ? 'Verificando…' : 'Ingresar'}</button>
-        <a className="admin-login__back" href="/">← Volver al sitio</a>
+        <a className="admin-login__back" href={href('/')}>← Volver al sitio</a>
       </form>
     </div>
   );

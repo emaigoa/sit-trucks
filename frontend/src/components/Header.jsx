@@ -10,7 +10,7 @@ import { withParams } from '../utils/catalogUrl.js';
 const links = [
   { to: '/catalogo', label: 'Catálogo' },
   { to: '/#buscador', label: 'Tu camión' },
-  { to: '/#marcas', label: 'Marcas' },
+  { to: '/#modelos', label: 'Modelos' },
   { to: '/#como-trabajamos', label: 'Cómo trabajamos' },
   { to: '/#ubicacion', label: 'Ubicación' },
 ];

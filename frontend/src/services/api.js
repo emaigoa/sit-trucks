@@ -58,12 +58,17 @@ export const api = {
   ...source,
   business: (opts) => source.business(opts).then(fixBusiness),
 
-  admin: {
-    stats: () => request('/products/stats', { auth: true }),
-    createProduct: (body) => request('/products', { method: 'POST', body, auth: true }),
-    updateProduct: (id, body) => request(`/products/${id}`, { method: 'PATCH', body, auth: true }),
-    deleteProduct: (id) => request(`/products/${id}`, { method: 'DELETE', auth: true }),
-    inquiries: () => request('/inquiries', { auth: true }),
-    setInquiryStatus: (id, status) => request(`/inquiries/${id}`, { method: 'PATCH', body: { status }, auth: true }),
-  },
+  admin: IS_STATIC
+    ? Object.fromEntries(['stats', 'createProduct', 'updateProduct', 'deleteProduct', 'inquiries', 'setInquiryStatus'].map((name) => [name, async (...args) => {
+      if (!staticApi) staticApi = (await import('./staticApi.js')).createStaticApi(ApiError);
+      return staticApi.admin[name](...args);
+    }]))
+    : {
+      stats: () => request('/products/stats', { auth: true }),
+      createProduct: (body) => request('/products', { method: 'POST', body, auth: true }),
+      updateProduct: (id, body) => request(`/products/${id}`, { method: 'PATCH', body, auth: true }),
+      deleteProduct: (id) => request(`/products/${id}`, { method: 'DELETE', auth: true }),
+      inquiries: () => request('/inquiries', { auth: true }),
+      setInquiryStatus: (id, status) => request(`/inquiries/${id}`, { method: 'PATCH', body: { status }, auth: true }),
+    },
 };

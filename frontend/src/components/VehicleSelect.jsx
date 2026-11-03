@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useBusiness } from '../hooks/useBusiness.jsx';
 import { yearOptions } from '../utils/vehicle.js';
 
@@ -10,20 +10,23 @@ export default function VehicleSelect({ value, onChange, dark = false, compact =
   const years = yearOptions(business?.vehicleYears?.from);
 
   const set = (patch) => onChange({ ...value, ...patch });
+  // Sitio monomarca: la marca queda fija y solo se elige modelo y año.
+  const single = brands.length === 1 ? brands[0].name : '';
+  useEffect(() => { if (single && value.brand !== single) onChange({ ...value, brand: single, model: '' }); }, [single, value, onChange]);
 
   return (
     <div className={`vehicle-select ${dark ? 'vehicle-select--dark' : ''} ${compact ? 'vehicle-select--compact' : ''}`}>
-      <label className="vehicle-select__field">
+      {!single && <label className="vehicle-select__field">
         <span>Marca</span>
         <select value={value.brand} onChange={(e) => set({ brand: e.target.value, model: '' })}>
           <option value="">Elegí la marca</option>
           {brands.map((b) => <option key={b.id} value={b.name}>{b.name}</option>)}
         </select>
-      </label>
+      </label>}
       <label className="vehicle-select__field">
         <span>Modelo</span>
         <select value={value.model} onChange={(e) => set({ model: e.target.value })} disabled={!value.brand}>
-          <option value="">{value.brand ? 'Todos los modelos' : '—'}</option>
+          <option value="">{value.brand ? `Todos los modelos${single ? ` ${single}` : ''}` : '—'}</option>
           {models.map((m) => <option key={m}>{m}</option>)}
         </select>
       </label>

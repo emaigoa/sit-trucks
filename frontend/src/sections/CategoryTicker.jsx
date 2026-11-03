@@ -1,7 +1,7 @@
 import React from 'react';
 import Marquee from '../components/Marquee.jsx';
 
-const words = ['IVECO', 'Motor', 'Mercedes-Benz', 'Frenos', 'Scania', 'Transmisión', 'Volvo', 'Despacho en el día', 'Ford', 'Neumática', 'Volkswagen', 'Suspensión'];
+const words = ['IVECO', 'Daily', 'Motor', 'Tector', 'Frenos', 'Stralis', 'Despacho en el día', 'EuroCargo', 'Transmisión', 'Cursor', 'Neumática', 'S-Way'];
 
 export default function CategoryTicker() {
   return (

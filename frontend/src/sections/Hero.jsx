@@ -18,7 +18,7 @@ export default function Hero() {
       <div className="hero__grid-bg" aria-hidden="true" />
       <div className="container hero__inner">
         <div className="hero__copy">
-          <p className="eyebrow hero__eyebrow"><span className="tick" /> Mar del Plata · Repuestos <RotatingWord words={b?.brands?.map((x) => x.name) ?? ['IVECO']} /></p>
+          <p className="eyebrow hero__eyebrow"><span className="tick" /> Mar del Plata · Repuestos IVECO <RotatingWord words={b?.brands?.[0]?.models ?? ['Daily', 'Tector', 'Stralis']} /></p>
           <h1 className="hero__title">
             <SplitText text="Que el camión" />
             <br />
@@ -26,7 +26,7 @@ export default function Hero() {
             <br />
             <span className="hero__title-accent"><SplitText text="parado." start={6} /></span>
           </h1>
-          <p className="hero__lead">Repuestos para IVECO, Mercedes-Benz, Scania, Volvo, Ford y Volkswagen. Nos pasás el código o una foto de la pieza, te confirmamos stock y compatibilidad en el momento y despachamos en el día.</p>
+          <p className="hero__lead">Especialistas en IVECO: Daily, EuroCargo, Tector, Stralis, Cursor y toda la línea pesada. Nos pasás el código o una foto de la pieza, te confirmamos stock y compatibilidad en el momento y despachamos en el día.</p>
           <div className="hero__ctas">
             <Link className="btn btn--accent btn--lg" to="/catalogo">Ver catálogo <Icon name="arrow" size={18} /></Link>
             {wa && <a className="btn btn--ghost btn--lg" href={wa} target="_blank" rel="noreferrer"><Icon name="whatsapp" size={18} /> WhatsApp</a>}
