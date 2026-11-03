@@ -3,6 +3,7 @@ import Icon from '../components/Icon.jsx';
 import Reveal from '../components/Reveal.jsx';
 import OpenBadge from '../components/OpenBadge.jsx';
 import { useBusiness } from '../hooks/useBusiness.jsx';
+import { href } from '../hooks/useRouter.jsx';
 import { directionsLink, groupedHours, mapEmbed, nowInArgentina } from '../utils/business.js';
 
 export default function Location() {
@@ -36,6 +37,10 @@ export default function Location() {
           </div>
         </Reveal>
         <Reveal className="location__map" variant="clip" delay={150}>
+          <figure className="storefront">
+            <img src={href('/img/local/entrada.webp')} alt={`Entrada del local en ${b.address.street}`} width="543" height="345" loading="lazy" />
+            <figcaption><Icon name="pin" size={14} /> Así es la entrada · {b.address.street}</figcaption>
+          </figure>
           <div className={`map-frame ${mapLoaded ? 'is-loaded' : ''}`}>
             <iframe title={`Mapa de ${b.name}`} src={mapEmbed(b)} loading="lazy" referrerPolicy="no-referrer-when-downgrade" onLoad={() => setMapLoaded(true)} />
             <span className="map-frame__coords">{b.geo.lat.toFixed(4)}° S · {Math.abs(b.geo.lng).toFixed(4)}° O</span>

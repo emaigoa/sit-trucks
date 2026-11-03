@@ -17,12 +17,12 @@ const read = () => {
   return { path: path.replace(/\/+$/, '') || '/', search: window.location.search, hash: window.location.hash };
 };
 
-function scrollToHash(hash) {
+function scrollToHash(hash, behavior = 'smooth') {
   if (!hash || hash.length < 2) return false;
   let tries = 0;
   const attempt = () => {
     const el = document.getElementById(decodeURIComponent(hash.slice(1)));
-    if (el) el.scrollIntoView({ behavior: 'smooth' });
+    if (el) el.scrollIntoView({ behavior });
     else if (tries++ < 20) setTimeout(attempt, 50); // la sección puede tardar un render en aparecer
   };
   requestAnimationFrame(attempt);
@@ -35,7 +35,7 @@ export function RouterProvider({ children }) {
   useEffect(() => {
     // Compatibilidad con el enlace viejo "#/admin".
     if (window.location.hash.startsWith('#/admin')) window.history.replaceState(null, '', href('/admin'));
-    else scrollToHash(window.location.hash); // entrada directa a "/#seccion"
+    else scrollToHash(window.location.hash, 'instant'); // entrada directa a "/#seccion": sin animación, para que no la corte la carga de imágenes
     const onPop = () => setLocation(read());
     window.addEventListener('popstate', onPop);
     return () => window.removeEventListener('popstate', onPop);

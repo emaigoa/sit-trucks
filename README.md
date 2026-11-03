@@ -72,4 +72,5 @@ Auth admin: header `Authorization: Bearer <ADMIN_TOKEN>`.
   - Campos: `manufacturer` (marca del repuesto), `origin` (`Original` | `Alternativo`), `thumb` (miniatura del listado)
 - Colores y tipografías: `frontend/src/styles/tokens.css` (paleta azul/blanco tomada del logo)
 - Logo: original en `assets/brand/logo-sit-original.png`; versiones web en `frontend/public/img/logo/`, favicon `frontend/public/favicon-48.png`
+- Foto de la entrada (sección Ubicación): `frontend/public/img/local/entrada.webp` (original en `assets/brand/`)
 - Secciones de la home: `frontend/src/sections/`
