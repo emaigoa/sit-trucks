@@ -9,8 +9,8 @@
 .slider__slide > * { flex: 1; }
 
 .slide { position: relative; min-height: clamp(560px, 78vh, 720px); display: flex; align-items: center; overflow: hidden; }
-.slide--dark { background: radial-gradient(ellipse 70% 80% at 80% 50%, #22272c, var(--ink) 70%); color: var(--ink-text); }
-.slide--steel { background: linear-gradient(120deg, #1b2026 0%, #2a3139 100%); color: var(--ink-text); }
+.slide--dark { background: radial-gradient(ellipse 70% 80% at 80% 50%, #0a3483, var(--ink) 70%); color: var(--ink-text); }
+.slide--steel { background: linear-gradient(120deg, #031f55 0%, #0c3a8c 100%); color: var(--ink-text); }
 .slide--accent { background: var(--accent); color: var(--accent-ink); }
 .slide--paper { background: var(--paper); color: var(--text); }
 .slide::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(currentColor 1px, transparent 1px), linear-gradient(90deg, currentColor 1px, transparent 1px); background-size: 56px 56px; opacity: 0.05; pointer-events: none; }
@@ -54,7 +54,7 @@
 
 /* Tarjetas de medios de pago */
 .slide__art--pay { display: flex; flex-wrap: wrap; align-content: center; justify-content: center; gap: 12px; }
-.pay-card { display: grid; place-items: center; min-width: 190px; height: 74px; padding: 0 22px; border-radius: 10px; background: #fff; border: 1px solid var(--paper-line); font-weight: 800; font-stretch: 110%; font-size: 17px; letter-spacing: -0.01em; box-shadow: 0 16px 30px -20px rgba(14, 16, 18, 0.4); opacity: 0; transform: translateY(30px) rotate(-3deg); transition: opacity 0.6s var(--ease-out), transform 0.8s var(--ease-out); transition-delay: calc(0.15s + var(--i) * 0.08s); }
+.pay-card { display: grid; place-items: center; min-width: 190px; height: 74px; padding: 0 22px; border-radius: 10px; background: #fff; border: 1px solid var(--paper-line); font-weight: 800; font-stretch: 110%; font-size: 17px; letter-spacing: -0.01em; box-shadow: 0 16px 30px -20px rgba(2, 22, 60, 0.4); opacity: 0; transform: translateY(30px) rotate(-3deg); transition: opacity 0.6s var(--ease-out), transform 0.8s var(--ease-out); transition-delay: calc(0.15s + var(--i) * 0.08s); }
 .pay-card:nth-child(odd) { background: var(--ink); color: var(--ink-text); }
 .slider__slide.is-active .pay-card { opacity: 1; transform: rotate(calc((var(--i) - 2) * 1.5deg)); }
 

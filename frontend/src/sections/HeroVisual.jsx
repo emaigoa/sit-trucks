@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { href } from '../hooks/useRouter.jsx';
 
 /**
  * Plano técnico de una maza/disco que se dibuja al cargar y gira lento.
@@ -55,6 +56,7 @@ export default function HeroVisual() {
           <text x="20" y="552">SIT-2048</text>
         </g>
       </svg>
+      <img className="hero-visual__logo" src={href('/img/logo/logo-512.webp')} alt="" width="200" height="200" />
     </div>
   );
 }

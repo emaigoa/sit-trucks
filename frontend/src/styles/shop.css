@@ -23,7 +23,7 @@
 /* ---------- Banner de marca ---------- */
 .brand-banner { position: relative; display: flex; align-items: flex-end; min-height: 240px; margin-bottom: 20px; border-radius: var(--radius-lg); overflow: hidden; background: var(--ink); color: var(--ink-text); isolation: isolate; animation: rise-in 0.6s var(--ease-out) both; }
 .brand-banner img { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; object-position: center 60%; animation: banner-zoom 14s ease-out both; }
-.brand-banner::before { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, rgba(14, 16, 18, 0.92) 0%, rgba(14, 16, 18, 0.6) 45%, rgba(14, 16, 18, 0.05) 100%); }
+.brand-banner::before { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, rgba(2, 22, 60, 0.92) 0%, rgba(2, 22, 60, 0.6) 45%, rgba(2, 22, 60, 0.05) 100%); }
 .brand-banner--plain { min-height: 180px; background: linear-gradient(120deg, var(--ink) 0%, var(--ink-3) 100%); }
 .brand-banner__copy { padding: clamp(20px, 3vw, 36px); max-width: 640px; }
 .brand-banner h2 { margin-top: 6px; font-family: var(--font-display); font-stretch: 125%; font-weight: 900; font-size: clamp(36px, 5vw, 64px); line-height: 0.95; letter-spacing: -0.03em; text-transform: uppercase; }
@@ -94,7 +94,7 @@
 .result--list { grid-template-columns: 200px minmax(0, 1fr); gap: 8px 20px; padding: 20px; border-bottom: 1px solid var(--paper-line); }
 .result--list:last-child { border-bottom: 0; }
 .result--grid { grid-template-rows: auto 1fr auto; border-radius: var(--radius-lg); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08); overflow: hidden; transition: box-shadow 0.3s, transform 0.3s var(--ease-out); }
-.result--grid:hover { box-shadow: 0 14px 34px -16px rgba(14, 16, 18, 0.4); transform: translateY(-2px); }
+.result--grid:hover { box-shadow: 0 14px 34px -16px rgba(2, 22, 60, 0.4); transform: translateY(-2px); }
 .result--list:hover .result__title a { color: var(--accent); }
 
 .result__media { position: relative; display: grid; place-items: center; aspect-ratio: 1; border-radius: var(--radius); background: #fff; overflow: hidden; }
@@ -120,7 +120,7 @@
 .result__ship.is-ok { color: #0f8a4f; }
 .result__ship span { color: var(--muted); }
 .result--grid .result__ship span { display: none; }
-.result__low { font-size: 13px; font-weight: 600; color: #c24a12; }
+.result__low { font-size: 13px; font-weight: 600; color: #0b47c9; }
 .result__fits { margin-top: 6px; font-size: 13px; color: var(--muted); }
 .result__code { margin-top: auto; padding-top: 8px; font-family: var(--font-mono); font-size: 11px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
@@ -197,7 +197,7 @@
 .pdp-box__ship { color: var(--muted); }
 .pdp-box__ship.is-ok { color: #0f8a4f; }
 .pdp-box__stock { font-weight: 600; }
-.pdp-box__stock.is-low { color: #c24a12; }
+.pdp-box__stock.is-low { color: #0b47c9; }
 .pdp-box__stock.is-out { color: var(--muted); }
 .pdp-box__fit { padding: 10px 12px; border-radius: 6px; font-size: 13.5px !important; }
 .pdp-box__fit.is-ok { background: rgba(52, 199, 123, 0.12); color: #0b6b3d; }
@@ -255,7 +255,7 @@
 .slide--photo::before { display: none; }
 .slide__photo { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; transform: scale(1.12); transition: transform 7s ease-out; }
 .slider__slide.is-active .slide__photo { transform: scale(1); }
-.slide--photo::after { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, rgba(14, 16, 18, 0.94) 0%, rgba(14, 16, 18, 0.72) 42%, rgba(14, 16, 18, 0.1) 80%), linear-gradient(0deg, rgba(14, 16, 18, 0.8) 0%, transparent 35%); }
+.slide--photo::after { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, rgba(2, 22, 60, 0.94) 0%, rgba(2, 22, 60, 0.72) 42%, rgba(2, 22, 60, 0.1) 80%), linear-gradient(0deg, rgba(2, 22, 60, 0.8) 0%, transparent 35%); }
 .slide--photo .slide__title { color: var(--ink-text); }
 .slide__chips a { display: block; }
 .slide__chips li { transition: background-color 0.2s, color 0.2s, border-color 0.2s; }
@@ -266,7 +266,7 @@
 .mosaic-tile { position: relative; display: block; aspect-ratio: 4 / 3; border-radius: var(--radius-lg); overflow: hidden; opacity: 0; transform: translateY(20px) scale(0.97); transition: opacity 0.6s var(--ease-out), transform 0.8s var(--ease-out); transition-delay: calc(var(--i) * 90ms + 0.2s); }
 .slider__slide.is-active .mosaic-tile { opacity: 1; transform: none; }
 .mosaic-tile img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s var(--ease-out); }
-.mosaic-tile::after { content: ''; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(14, 16, 18, 0.85), transparent 60%); }
+.mosaic-tile::after { content: ''; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(2, 22, 60, 0.85), transparent 60%); }
 .mosaic-tile span { position: absolute; left: 14px; bottom: 10px; z-index: 1; font-stretch: 120%; font-weight: 800; font-size: 18px; text-transform: uppercase; color: var(--ink-text); }
 .mosaic-tile:hover img { transform: scale(1.07); }
 @media (max-width: 860px) { .slide__mosaic { display: none; } .slide__credit { bottom: 84px; } }
@@ -279,7 +279,7 @@
 .brand-tile { position: relative; display: flex; flex-direction: column; justify-content: flex-end; height: 100%; min-height: 220px; padding: 20px; border-radius: var(--radius-lg); overflow: hidden; background: var(--ink); color: var(--ink-text); isolation: isolate; }
 .is-big .brand-tile { min-height: 300px; }
 .brand-tile img { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; transition: transform 1s var(--ease-out); }
-.brand-tile::before { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(0deg, rgba(14, 16, 18, 0.92) 0%, rgba(14, 16, 18, 0.2) 70%); transition: background-color 0.4s; }
+.brand-tile::before { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(0deg, rgba(2, 22, 60, 0.92) 0%, rgba(2, 22, 60, 0.2) 70%); transition: background-color 0.4s; }
 .brand-tile:hover img { transform: scale(1.06); }
 .brand-tile--plain { background: linear-gradient(135deg, var(--ink-3), var(--ink)); }
 .brand-tile__body { display: grid; gap: 4px; }

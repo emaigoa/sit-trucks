@@ -1,23 +1,21 @@
 import React from 'react';
-import { Link } from '../hooks/useRouter.jsx';
+import { Link, href } from '../hooks/useRouter.jsx';
 
-/** Marca: maza de rueda estilizada + logotipo. La marca gira levemente al hacer hover. */
-export default function Brand({ compact = false }) {
+/** Marca: logo circular del negocio + nombre. El logo gira levemente al hacer hover. */
+export default function Brand({ compact = false, large = false }) {
   return (
-    <Link className={`brand ${compact ? 'brand--compact' : ''}`} to="/" aria-label="Servicios Integrales Trucks, inicio">
-      <svg className="brand__mark" viewBox="0 0 48 48" aria-hidden="true">
-        <circle cx="24" cy="24" r="21" className="brand__ring" />
-        <g className="brand__hub">
-          <circle cx="24" cy="24" r="12" />
-          {[0, 60, 120, 180, 240, 300].map((a) => (
-            <circle key={a} cx={24 + 8 * Math.cos((a * Math.PI) / 180)} cy={24 + 8 * Math.sin((a * Math.PI) / 180)} r="1.6" className="brand__bolt" />
-          ))}
-          <circle cx="24" cy="24" r="3.4" className="brand__core" />
-        </g>
-      </svg>
+    <Link className={`brand ${compact ? 'brand--compact' : ''} ${large ? 'brand--large' : ''}`} to="/" aria-label="Servicios Integrales Truck, inicio">
+      <img
+        className="brand__mark"
+        src={href(large ? '/img/logo/logo-512.webp' : '/img/logo/logo-160.webp')}
+        alt=""
+        width={large ? 112 : 46}
+        height={large ? 112 : 46}
+        decoding="async"
+      />
       <span className="brand__type">
         <strong>Servicios Integrales</strong>
-        <span>Trucks<i>·</i>Mar del Plata</span>
+        <span>Truck<i>·</i>Repuestos IVECO MDQ</span>
       </span>
     </Link>
   );

@@ -11,7 +11,7 @@ export default function Footer() {
     <footer className="site-footer">
       <div className="container site-footer__grid">
         <div>
-          <Brand compact />
+          <Brand large />
           <p className="site-footer__claim">Repuestos IVECO.<br />Atención directa, de mostrador.</p>
         </div>
         {b && (

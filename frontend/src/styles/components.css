@@ -69,7 +69,7 @@
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 .field textarea { resize: vertical; min-height: 96px; }
-.field input:focus, .field textarea:focus, .field select:focus { outline: none; border-color: var(--text); box-shadow: 0 0 0 3px rgba(255, 91, 31, 0.25); }
+.field input:focus, .field textarea:focus, .field select:focus { outline: none; border-color: var(--text); box-shadow: 0 0 0 3px rgba(31, 99, 255, 0.25); }
 .field small { color: var(--bad); font-size: 12px; }
 .field.has-error input, .field.has-error textarea { border-color: var(--bad); }
 .form-error { color: var(--bad); font-size: 14px; }
@@ -87,7 +87,7 @@
 
 /* ---------- Buscador ---------- */
 .search { display: flex; align-items: center; gap: 10px; height: 50px; padding: 0 14px; border: 1px solid var(--paper-line); border-radius: var(--radius); background: #fff; color: var(--muted); transition: border-color 0.2s, box-shadow 0.2s; }
-.search:focus-within { border-color: var(--text); box-shadow: 0 0 0 3px rgba(255, 91, 31, 0.2); }
+.search:focus-within { border-color: var(--text); box-shadow: 0 0 0 3px rgba(31, 99, 255, 0.2); }
 .search input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--text); }
 .search button { display: grid; place-items: center; color: var(--muted); }
 .search--sm { height: 40px; }
@@ -169,7 +169,7 @@
   background-position: calc(100% - 20px) 22px, calc(100% - 15px) 22px; background-size: 5px 5px; background-repeat: no-repeat;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
-.vehicle-select select:focus { outline: none; border-color: var(--text); box-shadow: 0 0 0 3px rgba(255, 91, 31, 0.25); }
+.vehicle-select select:focus { outline: none; border-color: var(--text); box-shadow: 0 0 0 3px rgba(31, 99, 255, 0.25); }
 .vehicle-select select:disabled { opacity: 0.5; cursor: not-allowed; }
 .vehicle-select--dark select { height: 58px; border-color: var(--ink-line); background-color: var(--ink-3); color: var(--ink-text); font-size: 16px; font-weight: 600; }
 .vehicle-select--dark select:focus { border-color: var(--accent); }

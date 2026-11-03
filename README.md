@@ -70,5 +70,6 @@ Auth admin: header `Authorization: Bearer <ADMIN_TOKEN>`.
   - **Datos de prueba**: 114 artículos IVECO tomados del catálogo público de Repuestos Grasso (nombre, código OEM, foto enlazada a su sitio). Stock, marca del repuesto y tipo son inventados para probar filtros y orden. Reemplazar antes de publicar.
   - Los precios **no se publican**: cada repuesto tiene un botón "Consultar precio" que abre WhatsApp con el mensaje armado (repuesto, código, OEM, camión del cliente y link a la ficha). El texto se arma en `buildMessage` (`frontend/src/utils/business.js`).
   - Campos: `manufacturer` (marca del repuesto), `origin` (`Original` | `Alternativo`), `thumb` (miniatura del listado)
-- Colores y tipografías: `frontend/src/styles/tokens.css`
+- Colores y tipografías: `frontend/src/styles/tokens.css` (paleta azul/blanco tomada del logo)
+- Logo: original en `assets/brand/logo-sit-original.png`; versiones web en `frontend/public/img/logo/`, favicon `frontend/public/favicon-48.png`
 - Secciones de la home: `frontend/src/sections/`

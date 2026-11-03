@@ -1,23 +1,26 @@
 :root {
-  /* Superficies oscuras (acero / grafito) */
-  --ink: #0e1012;
-  --ink-2: #15181b;
-  --ink-3: #1f2327;
-  --ink-line: rgba(255, 255, 255, 0.09);
-  --ink-text: #eceae4;
-  --ink-muted: #8d9197;
+  /* Paleta tomada del logo: azul IVECO profundo + azul vivo + blanco */
+  /* Superficies oscuras (azul marino) */
+  --ink: #021d4d;
+  --ink-2: #052866;
+  --ink-3: #0a347f;
+  --ink-line: rgba(255, 255, 255, 0.13);
+  --ink-text: #ffffff;
+  --ink-muted: #a8b9da;
 
-  /* Superficies claras (papel técnico) */
-  --paper: #efede7;
-  --paper-2: #e4e1d9;
-  --paper-line: rgba(14, 16, 18, 0.12);
-  --text: #131518;
-  --muted: #62666c;
+  /* Superficies claras (blanco / celeste muy suave) */
+  --paper: #f2f6fd;
+  --paper-2: #e1e9f7;
+  --paper-line: rgba(2, 29, 77, 0.12);
+  --text: #071a3d;
+  --muted: #56658a;
 
   /* Señal */
-  --accent: #ff5b1f;
-  --accent-2: #ff7a45;
-  --accent-ink: #1b0b04;
+  --brand: #013684;
+  --accent: #1f63ff;
+  --accent-2: #4c86ff;
+  --accent-ink: #ffffff;
+  --accent-soft: rgba(31, 99, 255, 0.12);
   --ok: #34c77b;
   --warn: #f2b33d;
   --bad: #e5484d;
