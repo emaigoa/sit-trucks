@@ -56,6 +56,7 @@ function Row({ thumb, title, subtitle, badge, queries, active, busy, error, onPi
         <small>{subtitle}{badge && <span className="chip">{badge}</span>}</small>
         {error && <small className="form-error">{error}</small>}
         {active && !busy && <small className="img-row__hint">Pegá la imagen acá con <kbd>Ctrl</kbd>+<kbd>V</kbd> (o arrastrala)</small>}
+        {extra && <div className="img-row__extra">{extra}</div>}
         {copying && !busy && <CopyFrom onCopy={async (code) => { if (await onCopy(code)) setCopying(false); }} onClose={() => setCopying(false)} />}
       </div>
       <div className="img-row__actions">
@@ -66,7 +67,6 @@ function Row({ thumb, title, subtitle, badge, queries, active, busy, error, onPi
             <button className={`btn btn--sm ${active ? 'btn--accent' : 'btn--ghost'}`} onClick={onPick}>Pegar</button>
             <button className="btn btn--ghost btn--sm" onClick={() => input.current?.click()}>Subir</button>
             <button className={`btn btn--sm ${copying ? 'btn--accent' : 'btn--ghost'}`} onClick={() => setCopying((v) => !v)}>Copiar de…</button>
-            {extra}
             {onRemove && <button className="img-row__remove" onClick={onRemove} aria-label="Quitar imagen"><Icon name="trash" size={16} /></button>}
           </>
         )}
