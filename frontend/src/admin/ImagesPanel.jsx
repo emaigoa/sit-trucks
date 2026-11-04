@@ -7,8 +7,10 @@ import { useAsync } from '../hooks/useAsync.js';
  * Imágenes de los repuestos de la lista IVECO.
  * - Por tipo de pieza: una imagen ilustrativa por denominación ("FILTRO COMBUSTIBLE") que se ve en
  *   todos los repuestos de ese tipo. Ordenado por cantidad: los primeros cubren la mayor parte del catálogo.
+ *   "Códigos" despliega todos los códigos del tipo (de a 25) para cargar la foto exacta de cada uno.
  * - Por código: la foto exacta de un repuesto (tiene prioridad sobre la del tipo).
  * Flujo rápido: "Google" abre la búsqueda de imágenes → clic derecho "Copiar imagen" → volver y Ctrl+V.
+ * "Copiar de…" usa la misma imagen que ya tiene otro código (no se sube de nuevo).
  */
 const nf = new Intl.NumberFormat('es-AR');
 const google = (q) => `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(q)}`;
@@ -30,7 +32,7 @@ function CopyFrom({ onCopy, onClose }) {
   );
 }
 
-function Row({ thumb, title, subtitle, badge, queries, active, busy, error, onPick, onFile, onCopy, onRemove }) {
+function Row({ thumb, title, subtitle, badge, queries, active, busy, error, onPick, onFile, onCopy, onRemove, extra }) {
   const input = useRef(null);
   const [over, setOver] = useState(false);
   const [copying, setCopying] = useState(false);
@@ -64,12 +66,70 @@ function Row({ thumb, title, subtitle, badge, queries, active, busy, error, onPi
             <button className={`btn btn--sm ${active ? 'btn--accent' : 'btn--ghost'}`} onClick={onPick}>Pegar</button>
             <button className="btn btn--ghost btn--sm" onClick={() => input.current?.click()}>Subir</button>
             <button className={`btn btn--sm ${copying ? 'btn--accent' : 'btn--ghost'}`} onClick={() => setCopying((v) => !v)}>Copiar de…</button>
+            {extra}
             {onRemove && <button className="img-row__remove" onClick={onRemove} aria-label="Quitar imagen"><Icon name="trash" size={16} /></button>}
           </>
         )}
         <input ref={input} type="file" accept="image/*" hidden onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) onFile(f); }} />
       </div>
     </li>
+  );
+}
+
+const asExact = (code, img) => (p) => (p.code === code ? { ...p, thumb: img.thumb, image: img.url, imageKind: 'exacta' } : p);
+
+/** Fila de un código de la lista. `apply(img)` actualiza la lista que la contiene tras subir / copiar / quitar. */
+function PartRow({ p, ctx, apply }) {
+  const brand = p.manufacturer || 'IVECO';
+  return (
+    <Row
+      thumb={p.thumb}
+      title={p.name}
+      subtitle={`${p.code} · ${p.category}`}
+      badge={p.imageKind === 'ilustrativa' ? 'ilustrativa' : p.imageKind === 'exacta' ? 'foto exacta' : ''}
+      queries={{ name: `${p.name} ${brand}`, code: `${p.code} ${p.name} ${brand}` }}
+      active={ctx.isTarget('part', p.code)}
+      {...ctx.status[p.code]}
+      onPick={ctx.pick('part', p.code, apply)}
+      onFile={(f) => ctx.upload('part', p.code, f, apply)}
+      onCopy={(from) => ctx.copy('part', p.code, from, apply)}
+      onRemove={p.imageKind === 'exacta' ? () => ctx.remove('part', p.code, apply) : null}
+    />
+  );
+}
+
+function Pager({ page, pages, onPage }) {
+  if (!pages || pages <= 1) return null;
+  return (
+    <div className="img-pager">
+      <button className="btn btn--ghost btn--sm" disabled={page <= 1} onClick={() => onPage(page - 1)}>Anterior</button>
+      <span>Página {page} de {nf.format(pages)}</span>
+      <button className="btn btn--ghost btn--sm" disabled={page >= pages} onClick={() => onPage(page + 1)}>Siguiente</button>
+    </div>
+  );
+}
+
+/** Desplegable de un tipo de pieza: todos sus códigos, de a 25, para cargar la foto exacta de cada uno. */
+function TypeCodes({ description, ctx }) {
+  const [page, setPage] = useState(1);
+  const codes = useAsync((opts) => ctx.guard(() => api.admin.typeCodes(description, page, opts)), [description, page]);
+  const apply = (code) => (img) => {
+    if (img) codes.setData((d) => d && { ...d, items: d.items.map(asExact(code, img)) });
+    else codes.reload();
+  };
+  return (
+    <div className="img-codes">
+      {codes.loading && <p className="admin-empty">Cargando códigos…</p>}
+      {codes.error && <p className="form-error">{codes.error.message}</p>}
+      {!codes.loading && codes.data && (
+        <>
+          <ul className="img-list">
+            {codes.data.items.map((p) => <PartRow key={p.code} p={p} ctx={ctx} apply={apply(p.code)} />)}
+          </ul>
+          <Pager page={codes.data.page} pages={codes.data.pages} onPage={setPage} />
+        </>
+      )}
+    </div>
   );
 }
 
@@ -81,7 +141,8 @@ export default function ImagesPanel({ onUnauthorized }) {
   const [category, setCategory] = useState('');
   const [categories, setCategories] = useState([]);
   const [page, setPage] = useState(1);
-  const [target, setTarget] = useState(null); // { kind, key } que recibe el próximo Ctrl+V
+  const [open, setOpen] = useState(null); // tipo de pieza desplegado
+  const [target, setTarget] = useState(null); // { kind, key, apply } que recibe el próximo Ctrl+V
   const [status, setStatus] = useState({}); // key → { busy, error }
 
   const guard = useCallback(async (fn) => {
@@ -93,22 +154,18 @@ export default function ImagesPanel({ onUnauthorized }) {
     : Promise.resolve(null)), [mode, q, category, missing, page]);
   // t: evita la caché del navegador del catálogo público para ver la imagen recién subida.
   const parts = useAsync((opts) => (mode === 'parts' && (q || category)
-    ? api.search({ q, categoria: category, porPagina: 20, pagina: page, t: Date.now() }, opts)
+    ? api.search({ q, categoria: category, porPagina: 25, pagina: page, t: Date.now() }, opts)
     : Promise.resolve(null)), [mode, q, category, page]);
   useEffect(() => {
     const list = types.data?.categories ?? parts.data?.categories;
     if (list?.length) setCategories(list);
   }, [types.data, parts.data]);
 
-  const run = useCallback(async (kind, key, action) => {
+  const run = useCallback(async (key, action, apply) => {
     setStatus((s) => ({ ...s, [key]: { busy: true } }));
     try {
       const img = await guard(action);
-      if (kind === 'type') {
-        types.setData((d) => d && { ...d, items: d.items.map((r) => (r.description === key ? { ...r, image: img } : r)) });
-      } else {
-        parts.setData((d) => d && { ...d, items: d.items.map((p) => (p.code === key ? { ...p, thumb: img.thumb, image: img.url, imageKind: 'exacta' } : p)) });
-      }
+      apply?.(img);
       setStatus((s) => ({ ...s, [key]: {} }));
       setTarget(null);
       return true;
@@ -116,19 +173,19 @@ export default function ImagesPanel({ onUnauthorized }) {
       setStatus((s) => ({ ...s, [key]: { error: err.message } }));
       return false;
     }
-  }, [guard, types, parts]);
-  const upload = useCallback((kind, key, file) => run(kind, key, () => api.admin.uploadImage(kind, key, file)), [run]);
-  const copy = (kind, key) => (from) => run(kind, key, () => api.admin.copyImage(kind, key, from));
+  }, [guard]);
 
-  const remove = async (kind, key) => {
-    if (!window.confirm('¿Quitar esta imagen?')) return;
-    try {
-      await guard(() => api.admin.removeImage(kind, key));
-      if (kind === 'type') types.setData((d) => d && { ...d, items: d.items.map((r) => (r.description === key ? { ...r, image: null } : r)) });
-      else parts.reload();
-    } catch (err) {
-      setStatus((s) => ({ ...s, [key]: { error: err.message } }));
-    }
+  const ctx = {
+    guard,
+    status,
+    isTarget: (kind, key) => target?.kind === kind && target?.key === key,
+    pick: (kind, key, apply) => () => setTarget({ kind, key, apply }),
+    upload: (kind, key, file, apply) => run(key, () => api.admin.uploadImage(kind, key, file), apply),
+    copy: (kind, key, from, apply) => run(key, () => api.admin.copyImage(kind, key, from), apply),
+    remove: async (kind, key, apply) => {
+      if (!window.confirm('¿Quitar esta imagen?')) return;
+      await run(key, async () => { await api.admin.removeImage(kind, key); return null; }, apply);
+    },
   };
 
   // Ctrl+V en cualquier parte del panel: va a la fila marcada.
@@ -138,16 +195,19 @@ export default function ImagesPanel({ onUnauthorized }) {
       const file = imageFromClipboard(e);
       if (!file) return;
       e.preventDefault();
-      upload(target.kind, target.key, file);
+      run(target.key, () => api.admin.uploadImage(target.kind, target.key, file), target.apply);
     };
     window.addEventListener('paste', onPaste);
     return () => window.removeEventListener('paste', onPaste);
-  }, [target, upload]);
+  }, [target, run]);
 
-  const submit = (e) => { e.preventDefault(); setPage(1); setQ(draft.trim()); };
-  const switchMode = (m) => { setMode(m); setPage(1); setTarget(null); };
-  const pick = (kind, key) => () => setTarget({ kind, key });
-  const isTarget = (kind, key) => target?.kind === kind && target?.key === key;
+  const applyType = (description) => (img) => types.setData((d) => d && { ...d, items: d.items.map((r) => (r.description === description ? { ...r, image: img } : r)) });
+  const applyPart = (code) => (img) => (img ? parts.setData((d) => d && { ...d, items: d.items.map(asExact(code, img)) }) : parts.reload());
+
+  const reset = () => { setPage(1); setOpen(null); };
+  const submit = (e) => { e.preventDefault(); reset(); setQ(draft.trim()); };
+  const switchMode = (m) => { setMode(m); reset(); setTarget(null); };
+  const goPage = (n) => { setPage(n); setOpen(null); };
 
   const data = mode === 'types' ? types.data : parts.data;
   const loading = mode === 'types' ? types.loading : parts.loading;
@@ -178,22 +238,22 @@ export default function ImagesPanel({ onUnauthorized }) {
             <button className={mode === 'types' ? 'is-active' : ''} onClick={() => switchMode('types')}>Por tipo de pieza</button>
             <button className={mode === 'parts' ? 'is-active' : ''} onClick={() => switchMode('parts')}>Por código</button>
           </div>
-          <select className="img-select" value={category} onChange={(e) => { setCategory(e.target.value); setPage(1); }} aria-label="Categoría">
+          <select className="img-select" value={category} onChange={(e) => { setCategory(e.target.value); reset(); }} aria-label="Categoría">
             <option value="">Todas las categorías</option>
             {categories.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
           {mode === 'types' && (
-            <label className="img-check"><input type="checkbox" checked={missing} onChange={(e) => { setMissing(e.target.checked); setPage(1); }} /> Solo sin imagen</label>
+            <label className="img-check"><input type="checkbox" checked={missing} onChange={(e) => { setMissing(e.target.checked); reset(); }} /> Solo sin imagen</label>
           )}
           <form className="search search--sm" onSubmit={submit}>
             <Icon name="search" size={17} />
-            <input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder={mode === 'types' ? 'Filtrar tipos (ej. filtro)' : 'Código o nombre'} />
+            <input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder={mode === 'types' ? 'Tipo o código (ej. filtro)' : 'Código o nombre'} />
           </form>
         </div>
 
         <p className="img-help">
           {mode === 'types'
-            ? 'La imagen de un tipo se muestra como "ilustrativa" en todos sus repuestos. Están ordenados por cantidad: empezá por arriba.'
+            ? 'La imagen de un tipo se muestra como "ilustrativa" en todos sus repuestos. Con "Códigos" desplegás todos los códigos de ese tipo para cargar la foto exacta de cada uno.'
             : 'La foto exacta tiene prioridad sobre la del tipo. Buscá por código o nombre, o elegí una categoría.'}
           {' '}Tocá <strong>Google</strong> (nombre + marca) o <strong>Por código</strong> (código + nombre + marca), copiá la imagen (clic derecho → Copiar imagen), volvé y pegala con <kbd>Ctrl</kbd>+<kbd>V</kbd>.
           {' '}Con <strong>Copiar de…</strong> usás la misma imagen que ya tiene otro código.
@@ -206,47 +266,37 @@ export default function ImagesPanel({ onUnauthorized }) {
         {!loading && data?.items.length > 0 && (
           <ul className="img-list">
             {mode === 'types'
-              ? data.items.map((r) => (
-                <Row
-                  key={r.description}
-                  thumb={r.image?.thumb}
-                  title={r.name}
-                  subtitle={`${nf.format(r.count)} repuestos · ${r.category} · ej. ${r.codes.join(', ')}`}
-                  queries={{ name: `${r.name} IVECO`, code: `${r.codes[0]} ${r.name} IVECO` }}
-                  active={isTarget('type', r.description)}
-                  {...status[r.description]}
-                  onPick={pick('type', r.description)}
-                  onFile={(f) => upload('type', r.description, f)}
-                  onCopy={copy('type', r.description)}
-                  onRemove={r.image ? () => remove('type', r.description) : null}
-                />
-              ))
-              : data.items.map((p) => (
-                <Row
-                  key={p.id}
-                  thumb={p.thumb}
-                  title={p.name}
-                  subtitle={`${p.code} · ${p.category}`}
-                  badge={p.imageKind === 'ilustrativa' ? 'ilustrativa' : p.imageKind === 'exacta' ? 'foto exacta' : ''}
-                  queries={{ name: `${p.name} ${p.manufacturer || 'IVECO'}`, code: `${p.code} ${p.name} ${p.manufacturer || 'IVECO'}` }}
-                  active={isTarget('part', p.code)}
-                  {...status[p.code]}
-                  onPick={pick('part', p.code)}
-                  onFile={(f) => upload('part', p.code, f)}
-                  onCopy={copy('part', p.code)}
-                  onRemove={p.imageKind === 'exacta' ? () => remove('part', p.code) : null}
-                />
-              ))}
+              ? data.items.map((r) => {
+                const apply = applyType(r.description);
+                const isOpen = open === r.description;
+                return (
+                  <React.Fragment key={r.description}>
+                    <Row
+                      thumb={r.image?.thumb}
+                      title={r.name}
+                      subtitle={`${nf.format(r.count)} repuestos · ${r.category} · ej. ${r.codes.join(', ')}`}
+                      queries={{ name: `${r.name} IVECO`, code: `${r.codes[0]} ${r.name} IVECO` }}
+                      active={ctx.isTarget('type', r.description)}
+                      {...status[r.description]}
+                      onPick={ctx.pick('type', r.description, apply)}
+                      onFile={(f) => ctx.upload('type', r.description, f, apply)}
+                      onCopy={(from) => ctx.copy('type', r.description, from, apply)}
+                      onRemove={r.image ? () => ctx.remove('type', r.description, apply) : null}
+                      extra={(
+                        <button className={`btn btn--sm ${isOpen ? 'btn--accent' : 'btn--ghost'}`} onClick={() => setOpen(isOpen ? null : r.description)} aria-expanded={isOpen}>
+                          Códigos ({nf.format(r.count)}) {isOpen ? '▴' : '▾'}
+                        </button>
+                      )}
+                    />
+                    {isOpen && <li className="img-codes-wrap"><TypeCodes description={r.description} ctx={ctx} /></li>}
+                  </React.Fragment>
+                );
+              })
+              : data.items.map((p) => <PartRow key={p.id} p={p} ctx={ctx} apply={applyPart(p.code)} />)}
           </ul>
         )}
 
-        {data?.pages > 1 && (
-          <div className="img-pager">
-            <button className="btn btn--ghost btn--sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>Anterior</button>
-            <span>Página {data.page} de {nf.format(data.pages)}</span>
-            <button className="btn btn--ghost btn--sm" disabled={page >= data.pages} onClick={() => setPage((p) => p + 1)}>Siguiente</button>
-          </div>
-        )}
+        {!loading && data && <Pager page={data.page} pages={data.pages} onPage={goPage} />}
       </div>
     </>
   );

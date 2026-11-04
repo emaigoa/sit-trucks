@@ -14,7 +14,10 @@ export function notFound(req, res) {
 
 // eslint-disable-next-line no-unused-vars
 export function errorHandler(error, req, res, next) {
-  const status = error.status || 500;
-  if (status >= 500) console.error(error);
-  res.status(status).json({ error: status >= 500 ? 'Error interno' : error.message, details: error.details });
+  const status = error.status || error.statusCode || 500;
+  const known = error instanceof HttpError;
+  if (status >= 500) console.error(known ? `[${req.method} ${req.originalUrl}] ${error.message}` : error);
+  // Los errores propios (HttpError) muestran su mensaje; los inesperados, uno genérico.
+  const message = known || status < 500 ? error.message : 'Error interno';
+  res.status(status).json({ error: status === 413 ? 'La imagen es demasiado pesada (máximo 12 MB)' : message, details: error.details });
 }

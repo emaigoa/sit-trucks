@@ -24,9 +24,18 @@ const slug = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().rep
 const publicUrl = (key) => `${r2.publicUrl.replace(/\/$/, '')}/${key}`;
 const keyOf = (url) => (url?.startsWith(r2.publicUrl) ? url.slice(r2.publicUrl.replace(/\/$/, '').length + 1) : null);
 
+async function send(command) {
+  try {
+    return await client.send(command);
+  } catch (error) {
+    console.error('[storage] R2:', error.name, error.message);
+    throw new HttpError(502, `No se pudo guardar en Cloudflare R2 (${error.name || 'error'}). Revisá el token y el bucket.`);
+  }
+}
+
 /** Sube una imagen (buffer de cualquier formato común) y devuelve { url, thumb }. */
 export async function uploadImage(buffer, { folder, name }) {
-  if (!storageReady()) throw new HttpError(503, 'El almacenamiento de imágenes (R2) no está configurado');
+  if (!storageReady()) throw new HttpError(503, 'Falta configurar Cloudflare R2 en el servidor (R2_ACCESS_KEY_ID / R2_SECRET_ACCESS_KEY)');
   if (!buffer?.length) throw new HttpError(422, 'No llegó ninguna imagen');
 
   let image;
@@ -40,13 +49,18 @@ export async function uploadImage(buffer, { folder, name }) {
   const id = `${slug(name)}-${crypto.randomBytes(4).toString('hex')}`; // nombre nuevo en cada subida: sin problemas de caché
   const out = {};
   for (const [size, { width, quality }] of Object.entries(SIZES)) {
-    const body = await image.clone()
-      .resize({ width, height: width, fit: 'inside', withoutEnlargement: true })
-      .flatten({ background: '#ffffff' }) // PNG con transparencia → fondo blanco
-      .webp({ quality })
-      .toBuffer();
+    let body;
+    try {
+      body = await image.clone()
+        .resize({ width, height: width, fit: 'inside', withoutEnlargement: true })
+        .flatten({ background: '#ffffff' }) // PNG con transparencia → fondo blanco
+        .webp({ quality })
+        .toBuffer();
+    } catch (error) {
+      throw new HttpError(422, /pixel limit/i.test(error.message) ? 'La imagen es demasiado grande (máx. 40 megapíxeles)' : 'No se pudo procesar la imagen: probá con otra o en otro formato (JPG, PNG, WebP)');
+    }
     const key = `${folder}/${id}-${size}.webp`;
-    await client.send(new PutObjectCommand({
+    await send(new PutObjectCommand({
       Bucket: r2.bucket,
       Key: key,
       Body: body,

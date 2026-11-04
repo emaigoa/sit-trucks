@@ -253,6 +253,23 @@ export async function typeStats({ q = '', category = '', missing = false, page =
   };
 }
 
+/** Códigos de un tipo de pieza, con la imagen que se ve hoy en cada uno (para cargarlas desde el admin). */
+export async function typeCodes({ description, page = 1, perPage = 25 } = {}) {
+  const [items, img] = await Promise.all([listItems(), images()]);
+  const rows = items.filter((p) => p[RAW_DESC] === description);
+  const pages = Math.max(1, Math.ceil(rows.length / perPage));
+  const current = Math.min(pages, Math.max(1, page));
+  return {
+    items: rows.slice((current - 1) * perPage, current * perPage).map((p) => {
+      const { code, name, category, manufacturer, image, thumb, imageKind } = withImage(p, img);
+      return { code, name, category, manufacturer, image, thumb, imageKind };
+    }),
+    total: rows.length,
+    page: current,
+    pages,
+  };
+}
+
 /** Cantidad de repuestos de la lista vigente (desde memoria, sin consultar la base). */
 export async function listCount() {
   return (await listItems()).length;

@@ -77,6 +77,7 @@ export const api = {
     setInquiryStatus: (id, status) => request(`/inquiries/${id}`, { method: 'PATCH', body: { status }, auth: true }),
     imageTypes: (params, opts) => request(`/images/types?${new URLSearchParams(params)}`, { ...opts, auth: true }),
     uploadImage: (kind, key, file) => request(imagePath(kind, key), { method: 'PUT', file, auth: true }),
+    typeCodes: (description, page, opts) => request(`/images/types/codes?d=${encodeURIComponent(description)}&pagina=${page}`, { ...opts, auth: true }),
     copyImage: (kind, key, from) => request(kind === 'part'
       ? `/images/part/${encodeURIComponent(key)}/copy?from=${encodeURIComponent(from)}`
       : `/images/type/copy?d=${encodeURIComponent(key)}&from=${encodeURIComponent(from)}`, { method: 'PUT', auth: true }),
