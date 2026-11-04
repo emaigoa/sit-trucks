@@ -12,7 +12,27 @@ export class ApiError extends Error {
   }
 }
 
-async function request(path, { method = 'GET', body, file, auth: withAuth = false, signal } = {}) {
+/**
+ * Aviso de "servidor despertando": si un pedido tarda más de SLOW_MS (en el plan gratis de Render el
+ * servidor se duerme tras 15 min sin visitas), se emite el evento `api-slow` con la cantidad de pedidos
+ * lentos en curso. Lo escucha <ServerWaking />.
+ */
+const SLOW_MS = 2500;
+let slowCount = 0;
+const emitSlow = () => window.dispatchEvent(new CustomEvent('api-slow', { detail: slowCount }));
+
+async function request(path, options = {}) {
+  let slow = false;
+  const timer = setTimeout(() => { slow = true; slowCount += 1; emitSlow(); }, SLOW_MS);
+  try {
+    return await send(path, options);
+  } finally {
+    clearTimeout(timer);
+    if (slow) { slowCount -= 1; emitSlow(); }
+  }
+}
+
+async function send(path, { method = 'GET', body, file, auth: withAuth = false, signal } = {}) {
   const headers = {};
   if (body !== undefined) headers['Content-Type'] = 'application/json';
   if (file) headers['Content-Type'] = file.type || 'application/octet-stream';

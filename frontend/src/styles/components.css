@@ -181,3 +181,12 @@
 .empty { display: grid; justify-items: center; gap: 8px; padding: 60px 20px; text-align: center; border: 1px dashed var(--paper-line); border-radius: var(--radius-lg); color: var(--text); }
 .empty strong { font-size: 20px; }
 .empty p { color: var(--muted); margin-bottom: 8px; }
+
+/* Aviso "servidor despertando" */
+.waking { position: fixed; left: 50%; top: 16px; z-index: 1000; display: flex; gap: 12px; align-items: center; width: min(420px, calc(100% - 32px)); padding: 12px 16px; border-radius: 14px; background: #021d4d; color: #fff; box-shadow: 0 12px 32px rgb(2 29 77 / 0.35); transform: translateX(-50%); animation: waking-in 0.3s ease-out both; }
+.waking strong { display: block; font-size: 14px; }
+.waking small { display: block; font-size: 12.5px; color: rgb(255 255 255 / 0.75); }
+.waking__spinner { flex: none; width: 22px; height: 22px; border-radius: 50%; border: 3px solid rgb(255 255 255 / 0.25); border-top-color: #fff; animation: waking-spin 0.8s linear infinite; }
+@keyframes waking-spin { to { transform: rotate(360deg); } }
+@keyframes waking-in { from { opacity: 0; transform: translate(-50%, -8px); } }
+@media (prefers-reduced-motion: reduce) { .waking, .waking__spinner { animation: none; } }

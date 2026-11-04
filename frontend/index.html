@@ -28,7 +28,30 @@
     </script>
   </head>
   <body>
-    <div id="root"></div>
+    <!-- Pantalla de carga: se ve mientras baja la app; React la reemplaza al montar #root. -->
+    <style>
+      .boot { position: fixed; inset: 0; display: grid; place-items: center; background: #021d4d; color: #fff; font-family: Archivo, system-ui, sans-serif; z-index: 9999; }
+      .boot__card { display: grid; justify-items: center; gap: 18px; text-align: center; padding: 24px; }
+      .boot__logo { width: 96px; height: 96px; border-radius: 50%; background: #fff; padding: 6px; box-shadow: 0 0 0 0 rgb(255 255 255 / 0.5); animation: boot-pulse 1.6s ease-out infinite; }
+      .boot__name { margin: 0; font-size: 15px; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; }
+      .boot__bar { width: 160px; height: 3px; border-radius: 3px; background: rgb(255 255 255 / 0.18); overflow: hidden; }
+      .boot__bar::after { content: ""; display: block; width: 40%; height: 100%; border-radius: 3px; background: #fff; animation: boot-slide 1.1s ease-in-out infinite; }
+      .boot__hint { margin: 0; max-width: 280px; font-size: 13px; line-height: 1.5; color: rgb(255 255 255 / 0.7); opacity: 0; animation: boot-in 0.4s 4s forwards; }
+      @keyframes boot-pulse { 70% { box-shadow: 0 0 0 18px rgb(255 255 255 / 0); } 100% { box-shadow: 0 0 0 0 rgb(255 255 255 / 0); } }
+      @keyframes boot-slide { 0% { transform: translateX(-100%); } 100% { transform: translateX(250%); } }
+      @keyframes boot-in { to { opacity: 1; } }
+      @media (prefers-reduced-motion: reduce) { .boot__logo, .boot__bar::after { animation: none; } .boot__hint { animation: none; opacity: 1; } }
+    </style>
+    <div id="root">
+      <div class="boot" role="status" aria-live="polite">
+        <div class="boot__card">
+          <img class="boot__logo" src="%BASE_URL%img/logo/logo-512.webp" alt="" width="96" height="96" />
+          <p class="boot__name">Servicios Integrales Trucks</p>
+          <div class="boot__bar"></div>
+          <p class="boot__hint">Cargando el catálogo de repuestos IVECO…</p>
+        </div>
+      </div>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

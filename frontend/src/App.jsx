@@ -6,6 +6,7 @@ import NotFound from './pages/NotFound.jsx';
 import Header from './components/Header.jsx';
 import Footer from './components/Footer.jsx';
 import WhatsAppFab from './components/WhatsAppFab.jsx';
+import ServerWaking from './components/ServerWaking.jsx';
 import { BusinessProvider } from './hooks/useBusiness.jsx';
 import { RouterProvider, useRouter } from './hooks/useRouter.jsx';
 import { VehicleProvider } from './hooks/useVehicle.jsx';
@@ -15,7 +16,7 @@ const Admin = lazy(() => import('./pages/Admin.jsx'));
 
 function Routes() {
   const { path } = useRouter();
-  if (path === '/admin') return <Suspense fallback={null}><Admin /></Suspense>;
+  if (path === '/admin') return <Suspense fallback={null}><Admin /><ServerWaking /></Suspense>;
 
   let page;
   if (path === '/') page = <Home />;
@@ -29,6 +30,7 @@ function Routes() {
       <main className={path === '/' ? '' : 'page'}>{page}</main>
       <Footer />
       <WhatsAppFab />
+      <ServerWaking />
     </>
   );
 }
