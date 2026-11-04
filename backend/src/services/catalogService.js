@@ -1,4 +1,7 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
 import { prisma } from '../db.js';
+import { config } from '../config.js';
 import { all as curatedProducts } from './productService.js';
 
 /**
@@ -9,8 +12,7 @@ import { all as curatedProducts } from './productService.js';
  * (o partCode), se muestra ese, con su foto y stock. La lista no informa cantidades: todo lo que viene
  * en la lista se considera disponible (LIST_STOCK) y el precio no se publica, como el resto del sitio.
  *
- * Todo se cachea en memoria; los productos del admin se recargan tras cada cambio y la lista cada
- * PARTS_TTL (o al reiniciar el servidor después de una importación).
+ * Todo se cachea en memoria; los productos del admin se recargan tras cada cambio desde el admin.
  */
 const PARTS_TTL = 30 * 60_000;
 export const LIST_PREFIX = 'iveco-';
@@ -59,49 +61,97 @@ function fromPart(p) {
     thumb: '',
     manufacturer: 'IVECO',
     origin: 'Original',
-    updatedAt: p.updatedAt.toISOString(),
+    updatedAt: p.updatedAt,
     source: 'lista',
   };
 }
 
-let partsCache = { at: 0, items: null, loading: null };
+/*
+ * Para no gastar egress de Supabase, los ~50k repuestos se leen de la base lo menos posible:
+ * - En el build se guarda un snapshot en disco (npm run db:snapshot) y el servidor arranca desde ahí.
+ * - Cada PARTS_TTL solo se consulta la "versión" (fecha de la última importación, unos bytes);
+ *   la lista completa se vuelve a bajar únicamente si cambió.
+ * - Fichas, relacionados y búsquedas se resuelven en memoria: las vistas públicas no consultan la base.
+ */
+export const SNAPSHOT_FILE = path.join(config.dataDir, 'parts-snapshot.json');
+
+/** Versión de la lista vigente: fecha de la última importación (consulta mínima). */
+export async function listVersion() {
+  const { _max } = await prisma.priceList.aggregate({ _max: { importedAt: true } });
+  return _max.importedAt?.toISOString() ?? 'vacia';
+}
+
+/** Filas mínimas de la lista: [código, denominación, código NEXPRO]. */
+export async function fetchListRows() {
+  const rows = await prisma.part.findMany({ where: { active: true }, select: { code: true, description: true, nexproCode: true } });
+  return rows.map((r) => [r.code, r.description, r.nexproCode]);
+}
+
+async function readSnapshot() {
+  try { return JSON.parse(await fs.readFile(SNAPSHOT_FILE, 'utf8')); } catch { return null; }
+}
+
+const toItems = ({ version, rows }) => {
+  const updatedAt = version === 'vacia' ? new Date(0).toISOString() : version;
+  return rows.map(([code, description, nexproCode]) => fromPart({ code, description, nexproCode, updatedAt }));
+};
+
+let list = { version: null, items: [], checkedAt: 0 };
+let listLoading = null;
 let curatedCache = null;
+let merged = null; // { items, byId } — se rearma cuando cambia la lista o los productos del admin
+
+async function refreshList() {
+  const version = await listVersion();
+  if (version !== list.version) {
+    const snapshot = list.version === null ? await readSnapshot() : null;
+    const source = snapshot?.version === version ? snapshot : { version, rows: await fetchListRows() };
+    if (source !== snapshot) console.log(`[catalogo] lista ${version} descargada de la base (${source.rows.length} repuestos)`);
+    list = { version, items: toItems(source), checkedAt: Date.now() };
+    merged = null;
+  } else {
+    list.checkedAt = Date.now();
+  }
+}
 
 async function listItems() {
-  const fresh = partsCache.items && Date.now() - partsCache.at < PARTS_TTL;
-  if (fresh) return partsCache.items;
-  if (!partsCache.loading) {
-    partsCache.loading = prisma.part
-      .findMany({ where: { active: true }, select: { code: true, description: true, nexproCode: true, updatedAt: true } })
-      .then((rows) => {
-        partsCache = { at: Date.now(), items: rows.map(fromPart), loading: null };
-        return partsCache.items;
-      })
+  if (Date.now() - list.checkedAt >= PARTS_TTL && !listLoading) {
+    listLoading = refreshList()
       .catch((error) => {
-        partsCache.loading = null;
-        if (partsCache.items) return partsCache.items; // si falla, seguimos con la versión anterior
-        throw error;
-      });
+        if (list.version === null) throw error;
+        console.error('[catalogo] no se pudo verificar la lista, sigo con la anterior:', error.message);
+        list.checkedAt = Date.now();
+      })
+      .finally(() => { listLoading = null; });
   }
-  // Mientras se refresca, se sirve la versión anterior si existe.
-  return partsCache.items ?? partsCache.loading;
+  // Mientras se verifica, se sirve la versión anterior si existe.
+  if (list.version === null) await listLoading;
+  return list.items;
 }
 
 /** Llamar después de crear / editar / borrar productos desde el admin. */
 export function invalidateCurated() {
   curatedCache = null;
+  merged = null;
+}
+
+async function catalog() {
+  const listed = await listItems();
+  if (!curatedCache) curatedCache = curatedProducts().catch((e) => { curatedCache = null; throw e; });
+  const curated = await curatedCache;
+  if (!merged) {
+    const taken = new Set(curated.flatMap((p) => [p.code, p.partCode].filter(Boolean).map((c) => c.toUpperCase())));
+    const items = [...curated, ...listed.filter((p) => !taken.has(p.code.toUpperCase()))];
+    merged = { items, byId: new Map(items.map((p) => [p.id, p])) };
+  }
+  return merged;
 }
 
 export async function catalogItems() {
-  const [curated, listed] = await Promise.all([curatedCache ?? (curatedCache = curatedProducts().catch((e) => { curatedCache = null; throw e; })), listItems()]);
-  const taken = new Set(curated.flatMap((p) => [p.code, p.partCode].filter(Boolean).map((c) => c.toUpperCase())));
-  return [...curated, ...listed.filter((p) => !taken.has(p.code.toUpperCase()))];
+  return (await catalog()).items;
 }
 
-/** Repuesto de la lista por id virtual, o null. */
-export async function listItem(id) {
-  if (!id.startsWith(LIST_PREFIX)) return null;
-  const code = id.slice(LIST_PREFIX.length);
-  const part = await prisma.part.findFirst({ where: { code, active: true } });
-  return part ? fromPart(part) : null;
+/** Ficha por id (productos del admin y repuestos de la lista), sin consultar la base. */
+export async function catalogItem(id) {
+  return (await catalog()).byId.get(String(id)) ?? null;
 }

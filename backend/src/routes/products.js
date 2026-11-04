@@ -1,7 +1,8 @@
 import { Router } from 'express';
 import * as products from '../services/productService.js';
 import { search, related } from '../services/searchService.js';
-import { invalidateCurated, listItem } from '../services/catalogService.js';
+import { invalidateCurated, catalogItem } from '../services/catalogService.js';
+import { HttpError } from '../middleware/errors.js';
 import { asyncHandler } from '../middleware/errors.js';
 import { requireAdmin } from '../middleware/requireAdmin.js';
 
@@ -14,6 +15,7 @@ productsRouter.get('/', asyncHandler(async (req, res) => {
 
 // Catálogo público: filtros, facetas, orden y paginación.
 productsRouter.get('/search', asyncHandler(async (req, res) => {
+  res.set('Cache-Control', 'public, max-age=60');
   res.json({ categories: products.CATEGORIES, ...(await search(req.query)) });
 }));
 
@@ -21,7 +23,9 @@ productsRouter.get('/stats', requireAdmin, asyncHandler(async (req, res) => res.
 
 productsRouter.get('/:id', asyncHandler(async (req, res) => {
   // Repuestos de la lista de precios (id "iveco-<código>") o productos cargados en el admin.
-  const item = (await listItem(req.params.id)) ?? (await products.get(req.params.id));
+  const item = await catalogItem(req.params.id);
+  if (!item) throw new HttpError(404, 'Repuesto no encontrado');
+  res.set('Cache-Control', 'public, max-age=300');
   res.json({ ...item, related: await related(item) });
 }));
 

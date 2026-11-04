@@ -6,3 +6,4 @@ _legacy/
 _pages_test/
 *.xlsx
 *.local
+backend/data/parts-snapshot.json
