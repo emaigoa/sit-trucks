@@ -120,3 +120,23 @@ model Inquiry {
   @@index([createdAt(sort: Desc)])
   @@map("inquiries")
 }
+
+/// Foto exacta de un repuesto de la lista (subida desde el admin). Tiene prioridad sobre la del tipo.
+model PartImage {
+  code      String   @id @db.VarChar(20)
+  url       String   @db.VarChar(500)
+  thumb     String   @db.VarChar(500)
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("part_images")
+}
+
+/// Imagen ilustrativa por tipo de pieza (denominación exacta de la lista, ej. "FILTRO COMBUSTIBLE").
+model TypeImage {
+  description String   @id @db.VarChar(120)
+  url         String   @db.VarChar(500)
+  thumb       String   @db.VarChar(500)
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("type_images")
+}

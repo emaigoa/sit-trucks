@@ -6,6 +6,7 @@ import { config } from './config.js';
 import { businessRouter } from './routes/business.js';
 import { productsRouter } from './routes/products.js';
 import { inquiriesRouter } from './routes/inquiries.js';
+import { imagesRouter } from './routes/images.js';
 import { errorHandler, notFound } from './middleware/errors.js';
 
 export function createApp() {
@@ -19,6 +20,7 @@ export function createApp() {
   app.use('/api/business', businessRouter);
   app.use('/api/products', productsRouter);
   app.use('/api/inquiries', inquiriesRouter);
+  app.use('/api/images', imagesRouter);
   app.use('/api', notFound);
 
   // En producción el mismo servidor entrega el front compilado.

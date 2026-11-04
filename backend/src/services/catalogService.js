@@ -44,8 +44,12 @@ const sentence = (s) => {
   return t.charAt(0).toUpperCase() + t.slice(1);
 };
 
+/** Denominación original de la lista (clave de la imagen por tipo). Symbol: no sale en el JSON. */
+export const RAW_DESC = Symbol('rawDescription');
+
 function fromPart(p) {
   return {
+    [RAW_DESC]: p.description,
     id: `${LIST_PREFIX}${p.code}`,
     code: p.code,
     oemCode: '',
@@ -97,6 +101,7 @@ const toItems = ({ version, rows }) => {
 };
 
 let list = { version: null, items: [], checkedAt: 0 };
+let imagesCache = null; // Promise<{ parts: Map<código, img>, types: Map<denominación, img> }>
 let listLoading = null;
 let curatedCache = null;
 let merged = null; // { items, byId } — se rearma cuando cambia la lista o los productos del admin
@@ -135,16 +140,84 @@ export function invalidateCurated() {
   merged = null;
 }
 
+/** Imágenes subidas desde el admin (pocas filas: se leen una vez por arranque). */
+function images() {
+  if (!imagesCache) {
+    imagesCache = Promise.all([
+      prisma.partImage.findMany({ select: { code: true, url: true, thumb: true } }),
+      prisma.typeImage.findMany({ select: { description: true, url: true, thumb: true } }),
+    ]).then(([parts, types]) => ({
+      parts: new Map(parts.map((r) => [r.code, { url: r.url, thumb: r.thumb }])),
+      types: new Map(types.map((r) => [r.description, { url: r.url, thumb: r.thumb }])),
+    })).catch((e) => { imagesCache = null; throw e; });
+  }
+  return imagesCache;
+}
+
+/** Foto exacta del código o, si no hay, la ilustrativa de su tipo de pieza. */
+function withImage(p, img) {
+  const exact = img.parts.get(p.code);
+  if (exact) return { ...p, image: exact.url, thumb: exact.thumb, imageKind: 'exacta' };
+  const generic = img.types.get(p[RAW_DESC]);
+  if (generic) return { ...p, image: generic.url, thumb: generic.thumb, imageKind: 'ilustrativa' };
+  return p;
+}
+
 async function catalog() {
   const listed = await listItems();
   if (!curatedCache) curatedCache = curatedProducts().catch((e) => { curatedCache = null; throw e; });
-  const curated = await curatedCache;
+  const [curated, img] = await Promise.all([curatedCache, images()]);
   if (!merged) {
     const taken = new Set(curated.flatMap((p) => [p.code, p.partCode].filter(Boolean).map((c) => c.toUpperCase())));
-    const items = [...curated, ...listed.filter((p) => !taken.has(p.code.toUpperCase()))];
+    const items = [...curated, ...listed.filter((p) => !taken.has(p.code.toUpperCase())).map((p) => withImage(p, img))];
     merged = { items, byId: new Map(items.map((p) => [p.id, p])) };
   }
   return merged;
+}
+
+/** Actualiza la caché tras subir o quitar una imagen (img = null para quitarla). */
+export async function applyImage(kind, key, img) {
+  const maps = await images();
+  const map = kind === 'part' ? maps.parts : maps.types;
+  if (img) map.set(key, img); else map.delete(key);
+  merged = null;
+}
+
+export async function currentImage(kind, key) {
+  const maps = await images();
+  return (kind === 'part' ? maps.parts : maps.types).get(key) ?? null;
+}
+
+/** ¿Existe el código / la denominación en la lista vigente? */
+export async function listHas(kind, key) {
+  const items = await listItems();
+  return kind === 'part' ? items.some((p) => p.code === key) : items.some((p) => p[RAW_DESC] === key);
+}
+
+/**
+ * Tipos de pieza (denominaciones) con cuántos repuestos agrupan y su imagen ilustrativa.
+ * Ordenados de más a menos repuestos: cargar los primeros cubre la mayor parte del catálogo.
+ */
+export async function typeStats({ q = '', missing = false, page = 1, perPage = 30 } = {}) {
+  const [items, img] = await Promise.all([listItems(), images()]);
+  const counts = new Map();
+  for (const p of items) counts.set(p[RAW_DESC], (counts.get(p[RAW_DESC]) || 0) + 1);
+  const total = items.length;
+  const term = fold(String(q)).trim();
+  let rows = [...counts].map(([description, count]) => ({ description, name: sentence(description), count, image: img.types.get(description) ?? null }));
+  const covered = rows.reduce((sum, r) => sum + (r.image ? r.count : 0), 0);
+  if (term) rows = rows.filter((r) => fold(r.description).includes(term));
+  if (missing) rows = rows.filter((r) => !r.image);
+  rows.sort((a, b) => b.count - a.count || a.description.localeCompare(b.description));
+  const pages = Math.max(1, Math.ceil(rows.length / perPage));
+  const current = Math.min(pages, Math.max(1, page));
+  return {
+    items: rows.slice((current - 1) * perPage, current * perPage),
+    total: rows.length,
+    page: current,
+    pages,
+    coverage: { withImage: covered, total, exact: img.parts.size, types: img.types.size },
+  };
 }
 
 export async function catalogItems() {

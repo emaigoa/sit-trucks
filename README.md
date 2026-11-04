@@ -39,6 +39,20 @@ más reciente quedan `active = false`. Los Excel no se versionan (`*.xlsx` en `.
 Todas las tablas tienen RLS activado sin políticas: la API REST pública de Supabase no puede leerlas;
 solo el backend (rol `postgres`) accede.
 
+## Imágenes (Cloudflare R2)
+
+Panel admin → **Imágenes**:
+- **Por tipo de pieza:** una imagen ilustrativa por denominación de la lista (ej. "FILTRO COMBUSTIBLE"),
+  que se muestra en todos sus repuestos con la etiqueta "Imagen ilustrativa". Ordenadas por cantidad:
+  las 100 primeras cubren ~42 % del catálogo y las 300 primeras ~61 %.
+- **Por código:** foto exacta de un repuesto (tiene prioridad sobre la del tipo).
+
+"Google" abre la búsqueda de imágenes; se copia la imagen y se pega con Ctrl+V sobre la fila (también
+se puede arrastrar o subir un archivo). Usar fotos propias o con permiso del proveedor.
+El backend convierte cada imagen a WebP (1000 px y miniatura de 360 px) y la sube al bucket
+`sit-trucks-img`; R2 no cobra egress. Variables: `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`,
+`R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `R2_PUBLIC_URL`.
+
 ## Producción
 
 ```bash

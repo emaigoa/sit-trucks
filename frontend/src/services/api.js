@@ -12,12 +12,14 @@ export class ApiError extends Error {
   }
 }
 
-async function request(path, { method = 'GET', body, auth: withAuth = false, signal } = {}) {
+async function request(path, { method = 'GET', body, file, auth: withAuth = false, signal } = {}) {
   const headers = {};
   if (body !== undefined) headers['Content-Type'] = 'application/json';
+  if (file) headers['Content-Type'] = file.type || 'application/octet-stream';
   if (withAuth) headers.Authorization = `Bearer ${await auth.token()}`;
 
-  const response = await fetch(`${BASE}${path}`, { method, headers, signal, body: body === undefined ? undefined : JSON.stringify(body) });
+  const payload = file ?? (body === undefined ? undefined : JSON.stringify(body));
+  const response = await fetch(`${BASE}${path}`, { method, headers, signal, body: payload });
   if (response.status === 204) return null;
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new ApiError(response.status, data.error || 'Error de conexión', data.details);
@@ -33,6 +35,9 @@ const fixBusiness = (b) => ({
   ...b,
   brands: (b.brands || []).map((x) => ({ ...x, image: withBase(x.image), gallery: x.gallery?.map((g) => ({ ...g, image: withBase(g.image) })) })),
 });
+
+// kind: 'part' (foto exacta por código) · 'type' (ilustrativa por denominación)
+const imagePath = (kind, key) => (kind === 'part' ? `/images/part/${encodeURIComponent(key)}` : `/images/type?d=${encodeURIComponent(key)}`);
 
 let staticApi;
 const local = (name) => async (...args) => {
@@ -67,5 +72,8 @@ export const api = {
       deleteProduct: (id) => request(`/products/${id}`, { method: 'DELETE', auth: true }),
       inquiries: () => request('/inquiries', { auth: true }),
       setInquiryStatus: (id, status) => request(`/inquiries/${id}`, { method: 'PATCH', body: { status }, auth: true }),
+      imageTypes: (params, opts) => request(`/images/types?${new URLSearchParams(params)}`, { ...opts, auth: true }),
+      uploadImage: (kind, key, file) => request(imagePath(kind, key), { method: 'PUT', file, auth: true }),
+      removeImage: (kind, key) => request(imagePath(kind, key), { method: 'DELETE', auth: true }),
     },
 };
