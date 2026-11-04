@@ -20,6 +20,24 @@ npm run dev                            # API :4000 + web :5173 (proxy /api)
 - Producto: http://localhost:5173/producto/:id
 - Admin: http://localhost:5173/admin (pide el `ADMIN_TOKEN`)
 
+## Base de datos (Postgres en Supabase + Prisma)
+
+Esquema en `backend/prisma/schema.prisma`. Variables en `backend/.env` (ver `.env.example`):
+`DATABASE_URL` (transaction pooler, puerto 6543) para la app y `DIRECT_URL` (session pooler, 5432) para migraciones.
+
+```bash
+npm run db:deploy -w backend                     # aplica migraciones pendientes
+npm run db:migrate -w backend -- --name <cambio> # crea una migración nueva (desarrollo)
+npm run db:import -w backend -- "../Lista de Precios 01.11.2026 Iveco.xlsx"
+```
+
+El importador carga la hoja `LISTA BASE` (repuestos + historial de precio por lista) y `NEXPRO`
+(alternativos con su código genuino). Reimportar es seguro; los repuestos que no vienen en la lista
+más reciente quedan `active = false`. Los Excel no se versionan (`*.xlsx` en `.gitignore`).
+
+Todas las tablas tienen RLS activado sin políticas: la API REST pública de Supabase no puede leerlas;
+solo el backend (rol `postgres`) accede.
+
 ## Producción
 
 ```bash

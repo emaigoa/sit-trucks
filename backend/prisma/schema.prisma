@@ -1,0 +1,122 @@
+// Esquema de la base de repuestos (Postgres en Supabase).
+// Migraciones: `npm run db:migrate -w backend` · Cliente: `npm run db:generate -w backend`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// Una lista de precios importada desde el Excel de la terminal (una por mes).
+model PriceList {
+  id         Int         @id @default(autoincrement())
+  name       String // "Lista de Precios NOVIEMBRE 2026"
+  validFrom  DateTime    @map("valid_from") @db.Date
+  currency   String      @default("USD") @db.VarChar(3)
+  sourceFile String      @map("source_file")
+  importedAt DateTime    @default(now()) @map("imported_at")
+  partCount  Int         @default(0) @map("part_count")
+  prices     PartPrice[]
+
+  @@unique([validFrom])
+  @@map("price_lists")
+}
+
+/// Repuesto genuino IVECO de la lista base (hoja "LISTA BASE"). El código de catálogo es la clave.
+model Part {
+  code         String      @id @db.VarChar(20) // "Catálogo"
+  description  String      @db.VarChar(120) // "Denominación"
+  familyCode   String      @map("family_code") @db.VarChar(8) // "Familia" (ej. XA01)
+  discountCode String      @map("discount_code") @db.VarChar(4) // "D": código de bonificación
+  packQty      Int         @default(0) @map("pack_qty") // "Conf"
+  weightKg     Decimal     @default(0) @map("weight_kg") @db.Decimal(10, 3)
+  vatRate      Decimal     @default(21) @map("vat_rate") @db.Decimal(5, 2)
+  priceUsd     Decimal     @map("price_usd") @db.Decimal(12, 2) // precio s/IVA vigente
+  nexproCode   String?     @map("nexpro_code") @db.VarChar(20) // "PN NXP" ("-" = sin equivalente)
+  active       Boolean     @default(true) // false si dejó de venir en la última lista
+  updatedAt    DateTime    @updatedAt @map("updated_at")
+  prices       PartPrice[]
+  product      Product?
+
+  @@index([familyCode])
+  @@index([nexproCode])
+  @@map("parts")
+}
+
+/// Historial: el precio de cada repuesto en cada lista importada.
+model PartPrice {
+  priceListId Int       @map("price_list_id")
+  partCode    String    @map("part_code") @db.VarChar(20)
+  priceUsd    Decimal   @map("price_usd") @db.Decimal(12, 2)
+  priceList   PriceList @relation(fields: [priceListId], references: [id], onDelete: Cascade)
+  part        Part      @relation(fields: [partCode], references: [code], onDelete: Cascade)
+
+  @@id([priceListId, partCode])
+  @@index([partCode])
+  @@map("part_prices")
+}
+
+/// Repuesto alternativo NEXPRO y su equivalente genuino (hoja "NEXPRO").
+model NexproPart {
+  code             String   @id @db.VarChar(20) // "PN NEXPRO"
+  description      String   @db.VarChar(120)
+  detail           String   @default("") @db.VarChar(200)
+  priceUsd         Decimal? @map("price_usd") @db.Decimal(12, 2)
+  discountCode     String?  @map("discount_code") @db.VarChar(4)
+  genuineCode      String?  @map("genuine_code") @db.VarChar(20) // "PN GENUINO"
+  genuineName      String?  @map("genuine_name") @db.VarChar(120)
+  familyCode       String?  @map("family_code") @db.VarChar(8)
+  productFamily    String?  @map("product_family") @db.VarChar(60) // WEARING, MAINTENANCE…
+  application      String   @default("") // modelos de camión compatibles
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  @@index([genuineCode])
+  @@map("nexpro_parts")
+}
+
+/// Repuesto publicado en la tienda (lo que hoy está en data/products.json). Puede vincularse a un Part por código.
+model Product {
+  id            String   @id @default(uuid()) @db.Uuid
+  code          String   @unique @db.VarChar(24)
+  oemCode       String   @default("") @map("oem_code") @db.VarChar(60)
+  partCode      String?  @unique @map("part_code") @db.VarChar(20)
+  part          Part?    @relation(fields: [partCode], references: [code], onDelete: SetNull)
+  name          String   @db.VarChar(140)
+  detail        String   @default("") @db.VarChar(200)
+  description   String   @default("") @db.VarChar(1000)
+  category      String   @db.VarChar(40)
+  stock         Int      @default(0)
+  badge         String   @default("") @db.VarChar(24)
+  featured      Boolean  @default(false)
+  compatibility String[] @default([])
+  image         String   @default("") @db.VarChar(500)
+  thumb         String   @default("") @db.VarChar(500)
+  manufacturer  String   @default("") @db.VarChar(40)
+  origin        String   @default("Alternativo") @db.VarChar(20)
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@index([category])
+  @@map("products")
+}
+
+/// Consultas del formulario de contacto / mayoristas.
+model Inquiry {
+  id           String   @id @default(uuid()) @db.Uuid
+  type         String   @db.VarChar(20)
+  status       String   @default("nueva") @db.VarChar(20)
+  name         String   @db.VarChar(80)
+  contact      String   @db.VarChar(120)
+  message      String   @default("") @db.VarChar(1500)
+  productCode  String   @default("") @map("product_code") @db.VarChar(24)
+  vehicle      Json     @default("{}")
+  company      String?  @db.VarChar(100)
+  businessKind String?  @map("business_kind") @db.VarChar(40)
+  city         String?  @db.VarChar(80)
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@index([createdAt(sort: Desc)])
+  @@map("inquiries")
+}

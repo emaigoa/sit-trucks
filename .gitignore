@@ -4,3 +4,4 @@ backend/.env
 *.tmp
 _legacy/
 _pages_test/
+*.xlsx
