@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import Brand from '../components/Brand.jsx';
-import { adminToken, api, IS_STATIC } from '../services/api.js';
+import { auth, api, IS_STATIC } from '../services/api.js';
 import { href } from '../hooks/useRouter.jsx';
 
 export default function AdminLogin({ onSuccess }) {
-  const [token, setToken] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -12,13 +13,17 @@ export default function AdminLogin({ onSuccess }) {
     e.preventDefault();
     setBusy(true);
     setError('');
-    adminToken.set(token.trim());
     try {
-      await api.admin.stats();
+      await auth.signIn(email, password);
+      try {
+        await api.admin.stats(); // confirma que el backend acepta la sesión
+      } catch (err) {
+        await auth.signOut();
+        throw new Error(err.status === 401 ? 'Tu usuario no tiene acceso al panel.' : 'No se pudo conectar con la API.');
+      }
       onSuccess();
     } catch (err) {
-      adminToken.clear();
-      setError(err.status === 401 ? 'Token incorrecto.' : 'No se pudo conectar con la API.');
+      setError(err.message);
     } finally {
       setBusy(false);
     }
@@ -30,14 +35,18 @@ export default function AdminLogin({ onSuccess }) {
         <Brand compact />
         <h1>Panel de administración</h1>
         {IS_STATIC
-          ? <p className="admin-login__demo">Versión de demostración: ingresá con <strong>cualquier clave</strong>. Los cambios no se guardan.</p>
-          : <p>Ingresá el token configurado en <code>ADMIN_TOKEN</code> del backend.</p>}
+          ? <p className="admin-login__demo">Versión de demostración: ingresá con <strong>cualquier email y clave</strong>. Los cambios no se guardan.</p>
+          : <p>Ingresá con tu usuario de administrador.</p>}
         <label className="field">
-          <span>Token</span>
-          <input type="password" value={token} onChange={(e) => setToken(e.target.value)} autoFocus autoComplete="current-password" />
+          <span>Email</span>
+          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoFocus autoComplete="username" required />
+        </label>
+        <label className="field">
+          <span>Contraseña</span>
+          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" required />
         </label>
         {error && <span className="form-error">{error}</span>}
-        <button className="btn btn--accent btn--block" disabled={busy || !token}>{busy ? 'Verificando…' : 'Ingresar'}</button>
+        <button className="btn btn--accent btn--block" disabled={busy || !email || !password}>{busy ? 'Verificando…' : 'Ingresar'}</button>
         <a className="admin-login__back" href={href('/')}>← Volver al sitio</a>
       </form>
     </div>

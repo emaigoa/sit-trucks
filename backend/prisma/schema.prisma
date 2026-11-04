@@ -79,7 +79,7 @@ model NexproPart {
 
 /// Repuesto publicado en la tienda (lo que hoy está en data/products.json). Puede vincularse a un Part por código.
 model Product {
-  id            String   @id @default(uuid()) @db.Uuid
+  id            String   @id @default(uuid()) @db.VarChar(64)
   code          String   @unique @db.VarChar(24)
   oemCode       String   @default("") @map("oem_code") @db.VarChar(60)
   partCode      String?  @unique @map("part_code") @db.VarChar(20)
@@ -104,7 +104,7 @@ model Product {
 
 /// Consultas del formulario de contacto / mayoristas.
 model Inquiry {
-  id           String   @id @default(uuid()) @db.Uuid
+  id           String   @id @default(uuid()) @db.VarChar(64)
   type         String   @db.VarChar(20)
   status       String   @default("nueva") @db.VarChar(20)
   name         String   @db.VarChar(80)

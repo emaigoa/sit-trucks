@@ -1,9 +1,11 @@
 import { read } from '../store/jsonStore.js';
+import { catalogItems } from './catalogService.js';
 import { searchCatalog, relatedProducts } from '../../../shared/catalog.js';
 
 export { SORTS } from '../../../shared/catalog.js';
 
-const load = () => Promise.all([read('products', []), read('business', {})]);
+// business.json es configuración del sitio (versionada en el repo); el catálogo viene de Postgres.
+const load = () => Promise.all([catalogItems(), read('business', {})]);
 
 export async function search(query = {}) {
   const [items, business] = await load();

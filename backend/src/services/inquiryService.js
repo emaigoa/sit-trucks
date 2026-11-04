@@ -1,15 +1,24 @@
-import { read, update } from '../store/jsonStore.js';
+import { prisma } from '../db.js';
 import { HttpError } from '../middleware/errors.js';
 
-const STORE = 'inquiries';
 export const TYPES = ['consulta', 'mayorista'];
 const BUSINESS_KINDS = ['Taller', 'Flota / transporte', 'Casa de repuestos', 'Otro'];
+const STATUSES = ['nueva', 'respondida', 'archivada'];
 
 const text = (value, max) => String(value ?? '').trim().slice(0, max);
 
-export function create(input = {}) {
+/** Forma pública de la consulta (la misma que tenía el JSON: sin campos de mayorista si no aplica). */
+function toApi({ company, businessKind, city, createdAt, ...rest }) {
+  return {
+    ...rest,
+    ...(rest.type === 'mayorista' && { company: company ?? '', businessKind: businessKind ?? 'Otro', city: city ?? '' }),
+    createdAt: createdAt.toISOString(),
+  };
+}
+
+export async function create(input = {}) {
   // Campo trampa anti-spam: los humanos no lo ven ni lo completan.
-  if (input.website) return Promise.resolve({ ok: true });
+  if (input.website) return { ok: true };
 
   const type = TYPES.includes(input.type) ? input.type : 'consulta';
   const item = {
@@ -38,19 +47,16 @@ export function create(input = {}) {
   if (item.vehicle.year && !/^(19|20)\d{2}$/.test(item.vehicle.year)) errors.year = 'Año inválido';
   if (Object.keys(errors).length) throw new HttpError(422, 'Datos inválidos', errors);
 
-  const record = { id: crypto.randomUUID(), ...item, status: 'nueva', createdAt: new Date().toISOString() };
-  return update(STORE, [], (items) => ({ data: [record, ...items].slice(0, 2000), value: record }));
+  return toApi(await prisma.inquiry.create({ data: item }));
 }
 
-export const list = () => read(STORE, []);
+export async function list() {
+  return (await prisma.inquiry.findMany({ orderBy: { createdAt: 'desc' }, take: 2000 })).map(toApi);
+}
 
-export function setStatus(id, status) {
-  if (!['nueva', 'respondida', 'archivada'].includes(status)) throw new HttpError(422, 'Estado inválido');
-  return update(STORE, [], (items) => {
-    const index = items.findIndex((i) => i.id === id);
-    if (index === -1) throw new HttpError(404, 'Consulta no encontrada');
-    const next = [...items];
-    next[index] = { ...next[index], status };
-    return { data: next, value: next[index] };
-  });
+export async function setStatus(id, status) {
+  if (!STATUSES.includes(status)) throw new HttpError(422, 'Estado inválido');
+  const found = await prisma.inquiry.findUnique({ where: { id }, select: { id: true } });
+  if (!found) throw new HttpError(404, 'Consulta no encontrada');
+  return toApi(await prisma.inquiry.update({ where: { id }, data: { status } }));
 }

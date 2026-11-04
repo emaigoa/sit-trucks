@@ -11,11 +11,13 @@
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:import": "node --env-file-if-exists=.env scripts/import-lista.js",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "db:seed": "node --env-file-if-exists=.env scripts/seed.js"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.1",
     "@prisma/client": "^7.10.1",
+    "@supabase/supabase-js": "^2.118.0",
     "cors": "^2.8.5",
     "exceljs": "^4.4.0",
     "express": "^4.21.2",

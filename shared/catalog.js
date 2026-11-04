@@ -10,7 +10,7 @@
  * aplicado desaparece de la barra lateral y se muestra como "chip" removible.
  */
 
-export const CATEGORIES = ['Motor', 'Filtros', 'Frenos', 'Transmisión', 'Suspensión', 'Neumática', 'Eléctrico', 'Iluminación', 'Refrigeración', 'Carrocería'];
+export const CATEGORIES = ['Motor', 'Filtros', 'Frenos', 'Transmisión', 'Suspensión', 'Neumática', 'Eléctrico', 'Iluminación', 'Refrigeración', 'Carrocería', 'Varios'];
 export const ORIGINS = ['Original', 'Alternativo'];
 
 // Los precios no se publican: se consultan por WhatsApp.

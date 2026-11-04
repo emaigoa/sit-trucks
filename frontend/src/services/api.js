@@ -1,5 +1,8 @@
+import { auth } from './auth.js';
+
 const BASE = import.meta.env.VITE_API_URL || '/api';
-const TOKEN_KEY = 'sit-admin-token';
+
+export { auth };
 
 export class ApiError extends Error {
   constructor(status, message, details) {
@@ -9,16 +12,10 @@ export class ApiError extends Error {
   }
 }
 
-export const adminToken = {
-  get: () => { try { return sessionStorage.getItem(TOKEN_KEY) || ''; } catch { return ''; } },
-  set: (value) => { try { sessionStorage.setItem(TOKEN_KEY, value); } catch { /* sin storage */ } },
-  clear: () => { try { sessionStorage.removeItem(TOKEN_KEY); } catch { /* sin storage */ } },
-};
-
-async function request(path, { method = 'GET', body, auth = false, signal } = {}) {
+async function request(path, { method = 'GET', body, auth: withAuth = false, signal } = {}) {
   const headers = {};
   if (body !== undefined) headers['Content-Type'] = 'application/json';
-  if (auth) headers.Authorization = `Bearer ${adminToken.get()}`;
+  if (withAuth) headers.Authorization = `Bearer ${await auth.token()}`;
 
   const response = await fetch(`${BASE}${path}`, { method, headers, signal, body: body === undefined ? undefined : JSON.stringify(body) });
   if (response.status === 204) return null;

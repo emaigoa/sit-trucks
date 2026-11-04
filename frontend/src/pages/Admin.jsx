@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Brand from '../components/Brand.jsx';
 import Icon from '../components/Icon.jsx';
 import AdminLogin from '../admin/AdminLogin.jsx';
 import ProductsPanel from '../admin/ProductsPanel.jsx';
 import InquiriesPanel from '../admin/InquiriesPanel.jsx';
-import { adminToken, IS_STATIC } from '../services/api.js';
+import { auth, IS_STATIC } from '../services/api.js';
 import { href } from '../hooks/useRouter.jsx';
 
 const tabs = [
@@ -13,13 +13,20 @@ const tabs = [
 ];
 
 export default function Admin() {
-  const [authed, setAuthed] = useState(() => Boolean(adminToken.get()));
+  const [authed, setAuthed] = useState(null); // null = verificando la sesión guardada
   const [tab, setTab] = useState('products');
 
-  const logout = () => { adminToken.clear(); setAuthed(false); };
-  // Si la API rechaza el token, volvemos al login.
+  useEffect(() => {
+    let alive = true;
+    auth.user().then((user) => alive && setAuthed(Boolean(user)), () => alive && setAuthed(false));
+    return () => { alive = false; };
+  }, []);
+
+  const logout = () => { auth.signOut().finally(() => setAuthed(false)); };
+  // Si la API rechaza la sesión (vencida o sin permiso), volvemos al login.
   const onUnauthorized = () => logout();
 
+  if (authed === null) return <div className="admin-login" aria-busy="true" />;
   if (!authed) return <AdminLogin onSuccess={() => setAuthed(true)} />;
 
   return (

@@ -5,3 +5,4 @@ backend/.env
 _legacy/
 _pages_test/
 *.xlsx
+*.local

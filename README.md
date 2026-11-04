@@ -4,21 +4,22 @@ Sitio de repuestos **IVECO** — Tomás Falkner 6957, Mar del Plata.
 
 ```
 frontend/   React + Vite (tienda + panel admin)
-backend/    API Express con persistencia en JSON
+backend/    API Express + Prisma sobre Postgres (Supabase)
 ```
 
 ## Desarrollo
 
 ```bash
 npm install
-cp backend/.env.example backend/.env   # y cambiá ADMIN_TOKEN
+cp backend/.env.example backend/.env   # conexión a Postgres + Supabase Auth
+cp frontend/.env.example frontend/.env.local
 npm run dev                            # API :4000 + web :5173 (proxy /api)
 ```
 
 - Tienda: http://localhost:5173
 - Catálogo: http://localhost:5173/catalogo (filtros en la URL, ej. `/catalogo?marca=IVECO&modelo=Daily&orden=nuevos`)
 - Producto: http://localhost:5173/producto/:id
-- Admin: http://localhost:5173/admin (pide el `ADMIN_TOKEN`)
+- Admin: http://localhost:5173/admin (login con un usuario de Supabase Auth)
 
 ## Base de datos (Postgres en Supabase + Prisma)
 
@@ -71,7 +72,18 @@ hosting de Node (Render, Railway, VPS…).
 | POST | `/api/inquiries` | — | Consulta desde el formulario (rate limit 5 / 10 min) |
 | GET / PATCH | `/api/inquiries[/:id]` | admin | Listar / cambiar estado |
 
-Auth admin: header `Authorization: Bearer <ADMIN_TOKEN>`.
+Auth admin: header `Authorization: Bearer <access token de Supabase>`. El backend verifica el JWT
+y, si `ADMIN_EMAILS` tiene valores, que el email esté en la lista. Los usuarios admin se crean a mano
+en Supabase → Authentication → Users; el registro público está deshabilitado.
+
+## Catálogo
+
+El catálogo público combina los productos del admin (tabla `products`, con foto y stock) con los
+repuestos activos de la lista de precios IVECO (tabla `parts`), que se muestran como "Original · IVECO",
+disponibles y sin precio (id `iveco-<código>`). La categoría se asigna por palabras clave de la
+denominación (`backend/src/services/catalogService.js`); lo que no encaja va a "Varios". Si un producto
+del admin tiene el mismo código, se muestra el del admin. El catálogo se cachea en memoria (la lista se
+refresca cada 30 min; tras importar una lista nueva conviene reiniciar el servicio).
 
 ## Dónde editar
 
@@ -84,7 +96,7 @@ Auth admin: header `Authorization: Bearer <ADMIN_TOKEN>`.
   - `sellers`: vendedores de WhatsApp (con más de uno, la burbuja deja elegir)
 - Compatibilidad de un repuesto: `"IVECO"` cubre toda la marca, `"IVECO Tector"` solo ese modelo
   - `brands[].image` / `credit`: foto de la marca (en `frontend/public/img/brands/`, versión `-sm.webp` para mobile) y su atribución Creative Commons, que se muestra sobre la foto
-- Catálogo inicial: `backend/data/products.json` (o desde el panel admin)
+- Productos destacados: desde el panel admin (`backend/data/products.json` es la carga inicial, `npm run db:seed -w backend`, y los datos de la demo estática)
   - **Datos de prueba**: 114 artículos IVECO tomados del catálogo público de Repuestos Grasso (nombre, código OEM, foto enlazada a su sitio). Stock, marca del repuesto y tipo son inventados para probar filtros y orden. Reemplazar antes de publicar.
   - Los precios **no se publican**: cada repuesto tiene un botón "Consultar precio" que abre WhatsApp con el mensaje armado (repuesto, código, OEM, camión del cliente y link a la ficha). El texto se arma en `buildMessage` (`frontend/src/utils/business.js`).
   - Campos: `manufacturer` (marca del repuesto), `origin` (`Original` | `Alternativo`), `thumb` (miniatura del listado)

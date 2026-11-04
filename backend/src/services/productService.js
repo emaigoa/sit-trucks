@@ -1,10 +1,12 @@
-import { read, update } from '../store/jsonStore.js';
+import { prisma } from '../db.js';
 import { HttpError } from '../middleware/errors.js';
 import { CATEGORIES, ORIGINS, fitsVehicle } from '../../../shared/catalog.js';
 
 export { CATEGORIES, ORIGINS, fitsVehicle };
 
-const STORE = 'products';
+
+/** Forma pública del producto (la misma que tenía el JSON). */
+export const toApi = (p) => ({ ...p, updatedAt: p.updatedAt.toISOString() });
 
 function clean(input, { partial = false } = {}) {
   const errors = {};
@@ -47,62 +49,58 @@ function clean(input, { partial = false } = {}) {
   return out;
 }
 
+async function assertUniqueCode(code, exceptId) {
+  const clash = await prisma.product.findFirst({
+    where: { code: { equals: code, mode: 'insensitive' }, ...(exceptId && { NOT: { id: exceptId } }) },
+    select: { id: true },
+  });
+  if (clash) throw new HttpError(409, 'Ya existe un repuesto con ese código', { code: 'Código duplicado' });
+}
+
+/** Todos los productos de la tienda (el catálogo público se filtra en memoria con shared/catalog.js). */
+export async function all() {
+  return (await prisma.product.findMany({ orderBy: { updatedAt: 'desc' } })).map(toApi);
+}
+
 export async function list({ q = '', category, brand, model } = {}) {
-  const items = await read(STORE, []);
   const term = q.toString().trim().toLowerCase();
-  return items
-    .filter((p) =>
-      (!category || category === 'Todos' || p.category === category) &&
-      fitsVehicle(p, brand, model) &&
-      (!term || [p.name, p.code, p.oemCode, p.detail, p.category, ...(p.compatibility || [])].join(' ').toLowerCase().includes(term)))
-    .sort((a, b) => String(b.updatedAt).localeCompare(String(a.updatedAt)));
+  return (await all()).filter((p) =>
+    (!category || category === 'Todos' || p.category === category) &&
+    fitsVehicle(p, brand, model) &&
+    (!term || [p.name, p.code, p.oemCode, p.detail, p.category, ...(p.compatibility || [])].join(' ').toLowerCase().includes(term)));
 }
 
 export async function get(id) {
-  const item = (await read(STORE, [])).find((p) => p.id === id);
+  const item = await prisma.product.findUnique({ where: { id: String(id) } });
   if (!item) throw new HttpError(404, 'Repuesto no encontrado');
-  return item;
+  return toApi(item);
 }
 
-export function create(input) {
+export async function create(input) {
   const data = clean(input);
-  return update(STORE, [], (items) => {
-    if (items.some((p) => p.code.toLowerCase() === data.code.toLowerCase())) {
-      throw new HttpError(409, 'Ya existe un repuesto con ese código', { code: 'Código duplicado' });
-    }
-    const item = { id: crypto.randomUUID(), featured: false, compatibility: [], badge: '', description: '', detail: '', image: '', thumb: '', oemCode: '', manufacturer: '', origin: 'Alternativo', ...data, updatedAt: new Date().toISOString() };
-    return { data: [item, ...items], value: item };
-  });
+  await assertUniqueCode(data.code);
+  return toApi(await prisma.product.create({ data }));
 }
 
-export function patch(id, input) {
+export async function patch(id, input) {
   const data = clean(input, { partial: true });
-  return update(STORE, [], (items) => {
-    const index = items.findIndex((p) => p.id === id);
-    if (index === -1) throw new HttpError(404, 'Repuesto no encontrado');
-    if (data.code && items.some((p) => p.id !== id && p.code.toLowerCase() === data.code.toLowerCase())) {
-      throw new HttpError(409, 'Ya existe un repuesto con ese código', { code: 'Código duplicado' });
-    }
-    const item = { ...items[index], ...data, updatedAt: new Date().toISOString() };
-    const next = [...items];
-    next[index] = item;
-    return { data: next, value: item };
-  });
+  await get(id);
+  if (data.code) await assertUniqueCode(data.code, id);
+  return toApi(await prisma.product.update({ where: { id }, data }));
 }
 
-export function remove(id) {
-  return update(STORE, [], (items) => {
-    if (!items.some((p) => p.id === id)) throw new HttpError(404, 'Repuesto no encontrado');
-    return { data: items.filter((p) => p.id !== id), value: true };
-  });
+export async function remove(id) {
+  await get(id);
+  await prisma.product.delete({ where: { id } });
+  return true;
 }
 
 export async function stats() {
-  const items = await read(STORE, []);
-  return {
-    total: items.length,
-    inStock: items.filter((p) => p.stock > 5).length,
-    low: items.filter((p) => p.stock > 0 && p.stock <= 5).length,
-    out: items.filter((p) => p.stock === 0).length,
-  };
+  const [total, inStock, low, out] = await Promise.all([
+    prisma.product.count(),
+    prisma.product.count({ where: { stock: { gt: 5 } } }),
+    prisma.product.count({ where: { stock: { gt: 0, lte: 5 } } }),
+    prisma.product.count({ where: { stock: 0 } }),
+  ]);
+  return { total, inStock, low, out };
 }
