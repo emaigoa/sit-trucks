@@ -6,6 +6,7 @@ import { useAsync } from '../hooks/useAsync.js';
 
 export default function ProductsPanel({ onUnauthorized }) {
   const products = useAsync((opts) => api.products(opts), []);
+  const summary = useAsync(() => api.admin.stats().catch(() => null), []);
   const [editing, setEditing] = useState(null); // null | 'new' | product
   const [query, setQuery] = useState('');
   const [toast, setToast] = useState('');
@@ -55,9 +56,16 @@ export default function ProductsPanel({ onUnauthorized }) {
   return (
     <>
       <div className="admin__head">
-        <div><p className="eyebrow">Inventario</p><h1>Repuestos</h1></div>
+        <div><p className="eyebrow">Inventario</p><h1>Repuestos propios</h1></div>
         <button className="btn btn--accent" onClick={() => setEditing('new')}><Icon name="plus" size={18} /> Agregar</button>
       </div>
+
+      {summary.data?.list > 0 && (
+        <p className="img-help">
+          La lista IVECO ({new Intl.NumberFormat('es-AR').format(summary.data.list)} repuestos) ya se publica sola en el catálogo, siempre con stock.
+          Acá cargás productos propios (alternativos, usados, con foto y stock real), que se suman a la lista.
+        </p>
+      )}
 
       <div className="admin-stats">
         <div><span>Total</span><strong>{stats.total}</strong></div>

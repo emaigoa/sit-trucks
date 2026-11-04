@@ -220,6 +220,11 @@ export async function typeStats({ q = '', missing = false, page = 1, perPage = 3
   };
 }
 
+/** Cantidad de repuestos de la lista vigente (desde memoria, sin consultar la base). */
+export async function listCount() {
+  return (await listItems()).length;
+}
+
 export async function catalogItems() {
   return (await catalog()).items;
 }

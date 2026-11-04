@@ -1,6 +1,7 @@
 import { prisma } from '../db.js';
 import { HttpError } from '../middleware/errors.js';
 import { CATEGORIES, ORIGINS, fitsVehicle } from '../../../shared/catalog.js';
+import { listCount } from './catalogService.js';
 
 export { CATEGORIES, ORIGINS, fitsVehicle };
 
@@ -96,11 +97,12 @@ export async function remove(id) {
 }
 
 export async function stats() {
-  const [total, inStock, low, out] = await Promise.all([
+  const [list, total, inStock, low, out] = await Promise.all([
+    listCount(),
     prisma.product.count(),
     prisma.product.count({ where: { stock: { gt: 5 } } }),
     prisma.product.count({ where: { stock: { gt: 0, lte: 5 } } }),
     prisma.product.count({ where: { stock: 0 } }),
   ]);
-  return { total, inStock, low, out };
+  return { list, total, inStock, low, out };
 }
