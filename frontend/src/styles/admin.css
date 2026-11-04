@@ -122,3 +122,6 @@
   .img-row__thumb { width: 56px; height: 56px; }
   .img-row__actions { grid-column: 1 / -1; flex-wrap: wrap; }
 }
+.img-select { height: 40px; padding: 0 12px; border: 1px solid var(--paper-line); border-radius: var(--radius); background: #fff; font: inherit; font-size: 14px; color: var(--text); }
+.img-copy { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 6px; }
+.img-copy input { flex: 1 1 200px; min-width: 0; height: 34px; padding: 0 10px; border: 1px solid var(--paper-line); border-radius: var(--radius); font: inherit; font-size: 14px; text-transform: uppercase; }

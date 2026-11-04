@@ -183,6 +183,21 @@ export async function applyImage(kind, key, img) {
   merged = null;
 }
 
+/** ¿Alguna foto exacta o imagen de tipo sigue usando este archivo? (las copias comparten archivos). */
+export async function imageInUse(url) {
+  const maps = await images();
+  for (const map of [maps.parts, maps.types]) for (const img of map.values()) if (img.url === url) return true;
+  return false;
+}
+
+/** La imagen que se ve hoy para un código de la lista: la exacta o la ilustrativa de su tipo. */
+export async function shownImage(code) {
+  const [items, img] = await Promise.all([listItems(), images()]);
+  const part = items.find((p) => p.code === code);
+  if (!part) return null;
+  return img.parts.get(code) ?? img.types.get(part[RAW_DESC]) ?? null;
+}
+
 export async function currentImage(kind, key) {
   const maps = await images();
   return (kind === 'part' ? maps.parts : maps.types).get(key) ?? null;
@@ -198,21 +213,39 @@ export async function listHas(kind, key) {
  * Tipos de pieza (denominaciones) con cuántos repuestos agrupan y su imagen ilustrativa.
  * Ordenados de más a menos repuestos: cargar los primeros cubre la mayor parte del catálogo.
  */
-export async function typeStats({ q = '', missing = false, page = 1, perPage = 30 } = {}) {
+export async function typeStats({ q = '', category = '', missing = false, page = 1, perPage = 30 } = {}) {
   const [items, img] = await Promise.all([listItems(), images()]);
-  const counts = new Map();
-  for (const p of items) counts.set(p[RAW_DESC], (counts.get(p[RAW_DESC]) || 0) + 1);
+  const groups = new Map(); // denominación → { count, codes }
+  for (const p of items) {
+    const g = groups.get(p[RAW_DESC]) ?? { count: 0, codes: [] };
+    g.count += 1;
+    g.codes.push(p.code);
+    groups.set(p[RAW_DESC], g);
+  }
   const total = items.length;
   const term = fold(String(q)).trim();
-  let rows = [...counts].map(([description, count]) => ({ description, name: sentence(description), count, image: img.types.get(description) ?? null }));
+  let rows = [...groups].map(([description, g]) => ({
+    description,
+    name: sentence(description),
+    category: categoryFor(description),
+    count: g.count,
+    codes: g.codes,
+    image: img.types.get(description) ?? null,
+  }));
   const covered = rows.reduce((sum, r) => sum + (r.image ? r.count : 0), 0);
-  if (term) rows = rows.filter((r) => fold(r.description).includes(term));
+  // El filtro acepta parte de la denominación o un código (muestra el tipo al que pertenece).
+  if (term) rows = rows.filter((r) => fold(r.description).includes(term) || r.codes.some((c) => c.startsWith(term)));
+  if (category) rows = rows.filter((r) => r.category === category);
   if (missing) rows = rows.filter((r) => !r.image);
   rows.sort((a, b) => b.count - a.count || a.description.localeCompare(b.description));
   const pages = Math.max(1, Math.ceil(rows.length / perPage));
   const current = Math.min(pages, Math.max(1, page));
   return {
-    items: rows.slice((current - 1) * perPage, current * perPage),
+    // Solo algunos códigos de ejemplo (para buscar en Google); si se buscó un código, ese va primero.
+    items: rows.slice((current - 1) * perPage, current * perPage).map((r) => ({
+      ...r,
+      codes: [...r.codes.filter((c) => term && c.startsWith(term)), ...r.codes.filter((c) => !term || !c.startsWith(term))].slice(0, 3),
+    })),
     total: rows.length,
     page: current,
     pages,
