@@ -2,7 +2,6 @@ import React from 'react';
 import Brand from './Brand.jsx';
 import { useBusiness } from '../hooks/useBusiness.jsx';
 import { groupedHours } from '../utils/business.js';
-import { IS_STATIC } from '../services/api.js';
 import { Link } from '../hooks/useRouter.jsx';
 
 export default function Footer() {
@@ -33,7 +32,7 @@ export default function Footer() {
       </div>
       <div className="container site-footer__legal">
         <span>© {new Date().getFullYear()} Servicios Integrales Trucks</span>
-        <Link to="/admin">{IS_STATIC ? 'Panel admin (demo)' : 'Acceso administración'}</Link>
+        <Link to="/admin">Acceso administración</Link>
       </div>
     </footer>
   );

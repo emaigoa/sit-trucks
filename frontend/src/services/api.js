@@ -46,9 +46,6 @@ async function send(path, { method = 'GET', body, file, auth: withAuth = false, 
   return data;
 }
 
-/** true en el build para GitHub Pages: no hay servidor, los datos van dentro del sitio. */
-export const IS_STATIC = import.meta.env.VITE_STATIC === '1';
-
 // Las rutas de imágenes de business.json son absolutas ("/img/…"): se les antepone la base del sitio.
 const withBase = (src) => (src?.startsWith('/') ? `${import.meta.env.BASE_URL}${src.slice(1)}` : src);
 const fixBusiness = (b) => ({
@@ -59,41 +56,27 @@ const fixBusiness = (b) => ({
 // kind: 'part' (foto exacta por código) · 'type' (ilustrativa por denominación)
 const imagePath = (kind, key) => (kind === 'part' ? `/images/part/${encodeURIComponent(key)}` : `/images/type?d=${encodeURIComponent(key)}`);
 
-let staticApi;
-const local = (name) => async (...args) => {
-  if (!staticApi) staticApi = (await import('./staticApi.js')).createStaticApi(ApiError);
-  return staticApi[name](...args);
-};
-
-const remote = {
+const source = {
   business: (opts) => request('/business', opts),
   products: (opts) => request('/products', opts),
   search: (params, opts) => request(`/products/search?${new URLSearchParams(params)}`, opts),
   product: (id, opts) => request(`/products/${encodeURIComponent(id)}`, opts),
   sendInquiry: (body) => request('/inquiries', { method: 'POST', body }),
 };
-const source = IS_STATIC
-  ? { business: local('business'), products: local('products'), search: local('search'), product: local('product'), sendInquiry: local('sendInquiry') }
-  : remote;
 
 export const api = {
   ...source,
   business: (opts) => source.business(opts).then(fixBusiness),
 
-  admin: IS_STATIC
-    ? Object.fromEntries(['stats', 'createProduct', 'updateProduct', 'deleteProduct', 'inquiries', 'setInquiryStatus'].map((name) => [name, async (...args) => {
-      if (!staticApi) staticApi = (await import('./staticApi.js')).createStaticApi(ApiError);
-      return staticApi.admin[name](...args);
-    }]))
-    : {
-      stats: () => request('/products/stats', { auth: true }),
-      createProduct: (body) => request('/products', { method: 'POST', body, auth: true }),
-      updateProduct: (id, body) => request(`/products/${id}`, { method: 'PATCH', body, auth: true }),
-      deleteProduct: (id) => request(`/products/${id}`, { method: 'DELETE', auth: true }),
-      inquiries: () => request('/inquiries', { auth: true }),
-      setInquiryStatus: (id, status) => request(`/inquiries/${id}`, { method: 'PATCH', body: { status }, auth: true }),
-      imageTypes: (params, opts) => request(`/images/types?${new URLSearchParams(params)}`, { ...opts, auth: true }),
-      uploadImage: (kind, key, file) => request(imagePath(kind, key), { method: 'PUT', file, auth: true }),
-      removeImage: (kind, key) => request(imagePath(kind, key), { method: 'DELETE', auth: true }),
-    },
+  admin: {
+    stats: () => request('/products/stats', { auth: true }),
+    createProduct: (body) => request('/products', { method: 'POST', body, auth: true }),
+    updateProduct: (id, body) => request(`/products/${id}`, { method: 'PATCH', body, auth: true }),
+    deleteProduct: (id) => request(`/products/${id}`, { method: 'DELETE', auth: true }),
+    inquiries: () => request('/inquiries', { auth: true }),
+    setInquiryStatus: (id, status) => request(`/inquiries/${id}`, { method: 'PATCH', body: { status }, auth: true }),
+    imageTypes: (params, opts) => request(`/images/types?${new URLSearchParams(params)}`, { ...opts, auth: true }),
+    uploadImage: (kind, key, file) => request(imagePath(kind, key), { method: 'PUT', file, auth: true }),
+    removeImage: (kind, key) => request(imagePath(kind, key), { method: 'DELETE', auth: true }),
+  },
 };

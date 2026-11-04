@@ -5,13 +5,13 @@ import AdminLogin from '../admin/AdminLogin.jsx';
 import ProductsPanel from '../admin/ProductsPanel.jsx';
 import InquiriesPanel from '../admin/InquiriesPanel.jsx';
 import ImagesPanel from '../admin/ImagesPanel.jsx';
-import { auth, IS_STATIC } from '../services/api.js';
+import { auth } from '../services/api.js';
 import { href } from '../hooks/useRouter.jsx';
 
 const tabs = [
   { id: 'products', label: 'Repuestos', icon: 'box' },
   // Las imágenes se suben a R2: no existen en la demo estática.
-  ...(IS_STATIC ? [] : [{ id: 'images', label: 'Imágenes', icon: 'star' }]),
+  { id: 'images', label: 'Imágenes', icon: 'star' },
   { id: 'inquiries', label: 'Consultas', icon: 'inbox' },
 ];
 const panels = { products: ProductsPanel, images: ImagesPanel, inquiries: InquiriesPanel };
@@ -50,7 +50,6 @@ export default function Admin() {
         </div>
       </aside>
       <main className="admin__main">
-        {IS_STATIC && <p className="admin-demo"><strong>Modo demo.</strong> Podés probar todo: los cambios se ven en el catálogo mientras navegás, pero no se guardan y se pierden al recargar la página.</p>}
         {React.createElement(panels[tab], { onUnauthorized })}
       </main>
     </div>

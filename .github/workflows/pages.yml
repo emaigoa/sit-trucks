@@ -1,5 +1,7 @@
-# Publica el prototipo en GitHub Pages en cada push a main.
-# Build "estático": el catálogo corre en el navegador con los datos de backend/data (sin servidor).
+# Publica la tienda en GitHub Pages en cada push a main.
+# El frontend se sirve desde Pages (carga al instante, aunque Render esté dormido) y consume la API real
+# de Render: mismo catálogo (lista IVECO), consultas y panel admin con Supabase Auth.
+# La publishable key de Supabase es pública por diseño (los datos están protegidos con RLS).
 name: Deploy GitHub Pages
 
 on:
@@ -23,14 +25,16 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
       - run: npm ci
-      - name: Build estático
-        run: npm run build
+      - name: Build
+        run: npm run build -w frontend
         env:
-          VITE_STATIC: '1'
           VITE_BASE: /${{ github.event.repository.name }}/
+          VITE_API_URL: https://sit-trucks.onrender.com/api
+          VITE_SUPABASE_URL: https://nbquoztypmyvkythhmmq.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_w93RCUDzOwvRwi-CE4zStA_Ljy_zy0H
       # GitHub Pages no tiene fallback para SPA: 404.html = index.html permite entrar directo a /catalogo o /producto/:id
       - run: cp frontend/dist/index.html frontend/dist/404.html
       - uses: actions/configure-pages@v5

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Brand from '../components/Brand.jsx';
-import { auth, api, IS_STATIC } from '../services/api.js';
+import { auth, api } from '../services/api.js';
 import { href } from '../hooks/useRouter.jsx';
 
 export default function AdminLogin({ onSuccess }) {
@@ -34,9 +34,7 @@ export default function AdminLogin({ onSuccess }) {
       <form className="admin-login__card" onSubmit={submit}>
         <Brand compact />
         <h1>Panel de administración</h1>
-        {IS_STATIC
-          ? <p className="admin-login__demo">Versión de demostración: ingresá con <strong>cualquier email y clave</strong>. Los cambios no se guardan.</p>
-          : <p>Ingresá con tu usuario de administrador.</p>}
+        <p>Ingresá con tu usuario de administrador.</p>
         <label className="field">
           <span>Email</span>
           <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoFocus autoComplete="username" required />

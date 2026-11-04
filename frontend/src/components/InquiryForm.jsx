@@ -1,32 +1,12 @@
 import React, { useState } from 'react';
 import Icon from './Icon.jsx';
 import VehicleSelect from './VehicleSelect.jsx';
-import { api, IS_STATIC } from '../services/api.js';
-import { useBusiness } from '../hooks/useBusiness.jsx';
-import { whatsappLink } from '../utils/business.js';
-
-/** En la demo estática no hay servidor que reciba el formulario: se ofrece WhatsApp directo. */
-function DemoNotice({ initialMessage }) {
-  const business = useBusiness();
-  const wa = whatsappLink(business, initialMessage || 'Hola, quería hacer una consulta.');
-  return (
-    <div className="form-done" role="note">
-      <span className="form-done__icon"><Icon name="whatsapp" size={26} /></span>
-      <strong>Consultas por WhatsApp</strong>
-      <p>En esta versión de prueba el formulario no envía datos. Escribinos y te respondemos al momento.</p>
-      {wa && <a className="btn btn--accent btn--sm" href={wa} target="_blank" rel="noreferrer"><Icon name="whatsapp" size={16} /> Escribir por WhatsApp</a>}
-    </div>
-  );
-}
+import { api } from '../services/api.js';
 
 const emptyVehicle = { brand: '', model: '', year: '' };
 const empty = { name: '', contact: '', message: '', website: '' };
 
-export default function InquiryForm(props) {
-  return IS_STATIC ? <DemoNotice initialMessage={props.initialMessage} /> : <InquiryFormFields {...props} />;
-}
-
-function InquiryFormFields({ productCode = '', initialMessage = '', initialVehicle = emptyVehicle, compact = false }) {
+export default function InquiryForm({ productCode = '', initialMessage = '', initialVehicle = emptyVehicle, compact = false }) {
   const [values, setValues] = useState({ ...empty, message: initialMessage });
   const [vehicle, setVehicle] = useState(initialVehicle);
   const [errors, setErrors] = useState({});

@@ -60,16 +60,14 @@ npm run build   # compila el front en frontend/dist
 npm start       # el backend sirve la API y el front en el mismo puerto
 ```
 
-## Demo en GitHub Pages
+## GitHub Pages
 
-Cada push a `main` publica el prototipo con `.github/workflows/pages.yml`. Es un build **estático**
-(`VITE_STATIC=1`): no hay servidor, el catálogo corre en el navegador con los datos de
-`backend/data/*.json` y la misma lógica de búsqueda (`shared/catalog.js`). En ese modo:
-- el panel admin (`/admin`) es una demo: entra con cualquier clave y los cambios viven en memoria (se ven en el catálogo hasta recargar);
-- el formulario de contacto se reemplaza por un botón de WhatsApp.
+Cada push a `main` publica el frontend en GitHub Pages (`.github/workflows/pages.yml`), apuntando a la
+API de Render (`VITE_API_URL`). El HTML carga al instante aunque Render esté dormido, y la pantalla de
+carga avisa mientras despierta. El backend ya acepta el origen `https://emaigoa.github.io` (CORS).
 
-Para el sitio real con admin y consultas, desplegar el backend (`npm run build && npm start`) en un
-hosting de Node (Render, Railway, VPS…).
+`.github/workflows/keep-warm.yml` hace un ping a `/api/health` cada 10 min para que Render no se duerma
+(un servicio 24/7 entra en las 750 h gratis del mes; el ping no consulta Supabase).
 
 ## API
 
@@ -110,8 +108,7 @@ refresca cada 30 min; tras importar una lista nueva conviene reiniciar el servic
   - `sellers`: vendedores de WhatsApp (con más de uno, la burbuja deja elegir)
 - Compatibilidad de un repuesto: `"IVECO"` cubre toda la marca, `"IVECO Tector"` solo ese modelo
   - `brands[].image` / `credit`: foto de la marca (en `frontend/public/img/brands/`, versión `-sm.webp` para mobile) y su atribución Creative Commons, que se muestra sobre la foto
-- Productos propios (con foto y stock): desde el panel admin. `backend/data/products.json` son datos de ejemplo solo para la demo estática de GitHub Pages.
-  - **Datos de prueba**: 114 artículos IVECO tomados del catálogo público de Repuestos Grasso (nombre, código OEM, foto enlazada a su sitio). Stock, marca del repuesto y tipo son inventados para probar filtros y orden. Reemplazar antes de publicar.
+- Productos propios (con foto y stock): desde el panel admin.
   - Los precios **no se publican**: cada repuesto tiene un botón "Consultar precio" que abre WhatsApp con el mensaje armado (repuesto, código, OEM, camión del cliente y link a la ficha). El texto se arma en `buildMessage` (`frontend/src/utils/business.js`).
   - Campos: `manufacturer` (marca del repuesto), `origin` (`Original` | `Alternativo`), `thumb` (miniatura del listado)
 - Colores y tipografías: `frontend/src/styles/tokens.css` (paleta azul/blanco tomada del logo)

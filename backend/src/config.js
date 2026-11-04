@@ -6,7 +6,8 @@ const list = (value) => String(value || '').split(',').map((s) => s.trim().toLow
 
 export const config = {
   port: Number(process.env.PORT) || 4000,
-  corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+  // Orígenes permitidos (separados por coma). Siempre se suma la tienda publicada en GitHub Pages.
+  corsOrigin: [process.env.CORS_ORIGIN || 'http://localhost:5173', 'https://emaigoa.github.io'].join(','),
   supabaseUrl: process.env.SUPABASE_URL || '',
   supabaseKey: process.env.SUPABASE_PUBLISHABLE_KEY || '',
   // Emails con acceso al panel. Vacío = cualquier usuario de Supabase Auth (los registros deben estar deshabilitados).
