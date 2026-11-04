@@ -96,7 +96,7 @@ refresca cada 30 min; tras importar una lista nueva conviene reiniciar el servic
   - `sellers`: vendedores de WhatsApp (con más de uno, la burbuja deja elegir)
 - Compatibilidad de un repuesto: `"IVECO"` cubre toda la marca, `"IVECO Tector"` solo ese modelo
   - `brands[].image` / `credit`: foto de la marca (en `frontend/public/img/brands/`, versión `-sm.webp` para mobile) y su atribución Creative Commons, que se muestra sobre la foto
-- Productos destacados: desde el panel admin (`backend/data/products.json` es la carga inicial, `npm run db:seed -w backend`, y los datos de la demo estática)
+- Productos propios (con foto y stock): desde el panel admin. `backend/data/products.json` son datos de ejemplo solo para la demo estática de GitHub Pages.
   - **Datos de prueba**: 114 artículos IVECO tomados del catálogo público de Repuestos Grasso (nombre, código OEM, foto enlazada a su sitio). Stock, marca del repuesto y tipo son inventados para probar filtros y orden. Reemplazar antes de publicar.
   - Los precios **no se publican**: cada repuesto tiene un botón "Consultar precio" que abre WhatsApp con el mensaje armado (repuesto, código, OEM, camión del cliente y link a la ficha). El texto se arma en `buildMessage` (`frontend/src/utils/business.js`).
   - Campos: `manufacturer` (marca del repuesto), `origin` (`Original` | `Alternativo`), `thumb` (miniatura del listado)
