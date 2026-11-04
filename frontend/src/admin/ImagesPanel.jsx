@@ -260,6 +260,12 @@ export default function ImagesPanel({ onUnauthorized }) {
         </p>
 
         {loading && <p className="admin-empty">Cargando…</p>}
+        {!loading && (mode === 'types' ? types.error : parts.error) && (
+          <p className="admin-empty form-error">
+            {(mode === 'types' ? types.error : parts.error).message}{' '}
+            <button className="btn btn--ghost btn--sm" onClick={() => (mode === 'types' ? types.reload() : parts.reload())}>Reintentar</button>
+          </p>
+        )}
         {!loading && mode === 'parts' && !q && !category && <p className="admin-empty">Buscá un repuesto por código o nombre, o elegí una categoría.</p>}
         {!loading && data && !data.items.length && <p className="admin-empty">Sin resultados.</p>}
 
